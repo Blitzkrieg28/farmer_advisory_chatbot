@@ -127,21 +127,44 @@ def translate_stub(text: str, lang: str) -> str:
 # ---------------------------------------------------------------------------
 # NLLB translation (Colab only — not downloaded locally)
 # ---------------------------------------------------------------------------
-def translate_nllb(texts: list, src_lang: str, tgt_lang: str, model, tokenizer) -> list:
+def get_lang_id(tokenizer, lang_code: str) -> int:
+    """Get language token ID for NLLB tokenizer across transformers versions."""
+    if hasattr(tokenizer, "lang_code_to_id") and lang_code in tokenizer.lang_code_to_id:
+        return tokenizer.lang_code_to_id[lang_code]
+    token_id = tokenizer.convert_tokens_to_ids(lang_code)
+    if token_id is not None and token_id != getattr(tokenizer, "unk_token_id", None):
+        return token_id
+    raise ValueError(f"Language code '{lang_code}' not found in NLLB tokenizer vocabulary.")
+
+
+def translate_nllb(texts: list, src_lang: str, tgt_lang: str, model, tokenizer, batch_size: int = 32) -> list:
     """
     Translate a batch of texts using the loaded NLLB model.
     Call only after the model and tokenizer are loaded on Colab.
     tgt_lang: NLLB language code, e.g. "hin_Deva" for Hindi, "mar_Deva" for Marathi.
     """
-    # Tokenize
-    inputs = tokenizer(texts, return_tensors="pt", padding=True, truncation=True, max_length=256)
-    # Generate
-    translated_tokens = model.generate(
-        **inputs,
-        forced_bos_token_id=tokenizer.lang_code_to_id[tgt_lang],
-        max_new_tokens=256,
-    )
-    return [tokenizer.decode(t, skip_special_tokens=True) for t in translated_tokens]
+    import torch
+    if not texts:
+        return []
+
+    device = next(model.parameters()).device
+    forced_bos_token_id = get_lang_id(tokenizer, tgt_lang)
+    results = []
+
+    for i in range(0, len(texts), batch_size):
+        batch = texts[i:i + batch_size]
+        inputs = tokenizer(batch, return_tensors="pt", padding=True, truncation=True, max_length=256)
+        inputs = {k: v.to(device) for k, v in inputs.items()}
+        with torch.no_grad():
+            translated_tokens = model.generate(
+                **inputs,
+                forced_bos_token_id=forced_bos_token_id,
+                max_new_tokens=256,
+            )
+        decoded = [tokenizer.decode(t, skip_special_tokens=True).strip() for t in translated_tokens]
+        results.extend(decoded)
+
+    return results
 
 
 # ---------------------------------------------------------------------------
@@ -351,14 +374,141 @@ def main():
     if args.backend == "nllb":
         try:
             from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+            import torch
             nllb_model_name = "facebook/nllb-200-distilled-600M"
             print(f"  Loading {nllb_model_name}...")
             nllb_tokenizer = AutoTokenizer.from_pretrained(nllb_model_name, src_lang="eng_Latn")
-            nllb_model = AutoModelForSeq2SeqLM.from_pretrained(nllb_model_name)
-            print("  NLLB loaded.")
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+            dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+            nllb_model = AutoModelForSeq2SeqLM.from_pretrained(
+                nllb_model_name,
+                torch_dtype=dtype,
+            ).to(device)
+            print(f"  NLLB loaded on device={device} (dtype={dtype}).")
         except Exception as e:
             print(f"FATAL: Failed to load NLLB: {e}", file=sys.stderr)
             sys.exit(1)
+
+    prefix = "smoke_" if smoke else ""
+    train_csv_path = DATA_DIR / f"{prefix}retrieval_train.csv"
+    val_csv_path = DATA_DIR / f"{prefix}retrieval_val.csv"
+
+    # Fast-path for Step 3B: If English queries already exist from Step 3A (LLM),
+    # translate those existing English queries directly into Hindi and Marathi.
+    # This preserves all high-quality LLM generations and avoids re-generating from scratch.
+    if args.backend == "nllb" and train_csv_path.exists() and val_csv_path.exists():
+        print(f"\n  [INFO] Detected existing retrieval splits at {train_csv_path.name} and {val_csv_path.name}.")
+        print("  Translating existing English queries into Hindi and Marathi using NLLB...")
+
+        all_splits_records = {}
+        for split_name, csv_path in [("train", train_csv_path), ("val", val_csv_path)]:
+            raw_rows = []
+            with open(csv_path, "r", encoding="utf-8") as f:
+                lines = [l for l in f if not l.strip().startswith("#")]
+                reader = csv.DictReader(lines)
+                for r in reader:
+                    raw_rows.append(r)
+
+            en_rows = [r for r in raw_rows if r.get("language") == "en"]
+            if not en_rows:
+                print(f"  [WARNING] No English queries found in {csv_path}, falling back to full generation.")
+                all_splits_records = None
+                break
+
+            en_texts = [r["query"] for r in en_rows]
+            print(f"\n  [{split_name.upper()}] Translating {len(en_texts)} queries to Hindi (hin_Deva)...")
+            t0 = time.time()
+            hi_texts = translate_nllb(en_texts, "eng_Latn", "hin_Deva", nllb_model, nllb_tokenizer, batch_size=32)
+            print(f"  Hindi translation done in {time.time() - t0:.1f}s.")
+
+            print(f"  [{split_name.upper()}] Translating {len(en_texts)} queries to Marathi (mar_Deva)...")
+            t0 = time.time()
+            mr_texts = translate_nllb(en_texts, "eng_Latn", "mar_Deva", nllb_model, nllb_tokenizer, batch_size=32)
+            print(f"  Marathi translation done in {time.time() - t0:.1f}s.")
+
+            updated_split = []
+            for r in en_rows:
+                updated_split.append(dict(r))
+            for i, r in enumerate(en_rows):
+                updated_split.append({
+                    "query": hi_texts[i],
+                    "language": "hi",
+                    "chunk_id": r["chunk_id"],
+                    "source_id": r["source_id"],
+                    "synthetic": True,
+                    "doc_name": r.get("doc_name", ""),
+                    "page": r.get("page", -1),
+                })
+            for i, r in enumerate(en_rows):
+                updated_split.append({
+                    "query": mr_texts[i],
+                    "language": "mr",
+                    "chunk_id": r["chunk_id"],
+                    "source_id": r["source_id"],
+                    "synthetic": True,
+                    "doc_name": r.get("doc_name", ""),
+                    "page": r.get("page", -1),
+                })
+            all_splits_records[split_name] = updated_split
+
+        if all_splits_records is not None:
+            train_records = all_splits_records["train"]
+            val_records = all_splits_records["val"]
+            all_records = train_records + val_records
+
+            # Assertion: verify no source_id leakage
+            train_sids = {r["source_id"] for r in train_records}
+            val_sids = {r["source_id"] for r in val_records}
+            assert train_sids.isdisjoint(val_sids), \
+                f"ASSERT FAILED: {len(train_sids & val_sids)} source_ids in both train and val!"
+
+            for split_name, records in [("train", train_records), ("val", val_records)]:
+                lang_counts = {}
+                for r in records:
+                    lang_counts[r["language"]] = lang_counts.get(r["language"], 0) + 1
+                counts_str = ", ".join(f"{k}={v}" for k, v in sorted(lang_counts.items()))
+                print(f"  {split_name} language counts: {counts_str}")
+
+            fieldnames = ["query", "language", "chunk_id", "source_id", "synthetic", "doc_name", "page"]
+            DATA_DIR.mkdir(parents=True, exist_ok=True)
+            LOGS_DIR.mkdir(parents=True, exist_ok=True)
+
+            for split_name, records in [("train", train_records), ("val", val_records)]:
+                out_path = DATA_DIR / f"{prefix}retrieval_{split_name}.csv"
+                with open(out_path, "w", encoding="utf-8", newline="") as f:
+                    f.write(f"# {mode_tag} generated {datetime.now(timezone.utc).isoformat()}\n")
+                    writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
+                    writer.writeheader()
+                    writer.writerows(records)
+                print(f"  Written: {out_path} ({len(records)} rows)")
+
+            report = {
+                "mode": "smoke" if smoke else "real",
+                "backend": "llm+nllb",
+                "seed": args.seed,
+                "generated_at": datetime.now(timezone.utc).isoformat(),
+                "total_records": len(all_records),
+                "train_records": len(train_records),
+                "val_records": len(val_records),
+                "chunks_skipped": 0,
+                "source_id_overlap": len(train_sids & val_sids),
+                "train_sources": len(train_sids),
+                "val_sources": len(val_sids),
+                "train_lang_counts": {
+                    lang: sum(1 for r in train_records if r["language"] == lang)
+                    for lang in ["en", "hi", "mr"]
+                },
+                "val_lang_counts": {
+                    lang: sum(1 for r in val_records if r["language"] == lang)
+                    for lang in ["en", "hi", "mr"]
+                },
+            }
+            report_path = LOGS_DIR / f"{prefix}retrieval_split_report.json"
+            with open(report_path, "w", encoding="utf-8") as f:
+                json.dump(report, f, indent=2)
+            print(f"  Written: {report_path}")
+            print("\nDone.")
+            return
 
     # --- Generate queries ---
     all_records = []  # each row: query, language, chunk_id, source_id, synthetic
@@ -418,7 +568,7 @@ def main():
 
         # --- Hindi queries ---
         if args.backend == "nllb" and nllb_model is not None:
-            hi_queries = translate_nllb(en_queries, "en", "hin_Deva", nllb_model, nllb_tokenizer)
+            hi_queries = translate_nllb(en_queries, "eng_Latn", "hin_Deva", nllb_model, nllb_tokenizer, batch_size=32)
         elif args.backend == "template":
             hi_fns = rng.sample(QUERY_TEMPLATES_HI_STUB,
                                 min(len(QUERY_TEMPLATES_HI_STUB), len(en_queries)))
@@ -440,7 +590,7 @@ def main():
 
         # --- Marathi queries ---
         if args.backend == "nllb" and nllb_model is not None:
-            mr_queries = translate_nllb(en_queries, "en", "mar_Deva", nllb_model, nllb_tokenizer)
+            mr_queries = translate_nllb(en_queries, "eng_Latn", "mar_Deva", nllb_model, nllb_tokenizer, batch_size=32)
         elif args.backend == "template":
             mr_fns = rng.sample(QUERY_TEMPLATES_MR_STUB,
                                 min(len(QUERY_TEMPLATES_MR_STUB), len(en_queries)))
