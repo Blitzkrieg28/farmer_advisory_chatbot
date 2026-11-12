@@ -1,7 +1,7 @@
 # Farmer Advisory Chatbot Using Multilingual NLP
 ## A Verification-First Pipeline for Crop Disease Diagnosis and Grounded Treatment Advice
 
-> **Status**: **VERIFIED & REPRODUCIBLE** — End-to-end pipeline validated across Vision Diagnosis, Dense Cross-Lingual Retrieval, Rule-Based Critic Verification, and Gradio Web Demo.
+> **Status**: **VERIFIED & REPRODUCIBLE** — End-to-end pipeline validated across Vision Diagnosis, In-The-Wild Domain Gap Ablations, Dense Cross-Lingual Retrieval, Rule-Based Critic Verification, and Gradio Web Demo.
 
 ---
 
@@ -11,7 +11,7 @@ Smallholder farmers across India face severe crop losses due to plant diseases, 
 
 This repository implements a **verification-first, strictly extractive agricultural advisory system** supporting English, Hindi, and Marathi. The system links:
 
-1. **Vision Diagnoser (Trained)**: Fine-tuned CNN classifier (`EfficientNet-B0`) identifying crop diseases from leaf macro-photographs across 14 disease/healthy classes.
+1. **Vision Diagnoser (Trained)**: Fine-tuned CNN classifier (`EfficientNet-B0`) identifying crop diseases from leaf macro-photographs across 14 disease/healthy classes. Evaluated under both laboratory (PlantVillage) and real unconstrained field conditions (PlantDoc).
 2. **Dense Multilingual Retriever (Trained)**: Domain-adapted sentence-transformer (`intfloat/multilingual-e5-small`) fine-tuned with Multiple Negatives Ranking Loss (MNRL) to retrieve grounded treatment passages from 429 verified chunks of official ICAR & State Agricultural University extension manuals.
 3. **Critic / Verification Layer (Rule-Based)**: A deterministic 3-way decision engine that eliminates hallucinations:
    - **ACCEPT** ($p_1 \ge \tau \land \text{margin} \ge \delta$): Delivers verbatim extractive advice with exact document, page number, and chemical dosage flags.
@@ -26,7 +26,7 @@ This repository implements a **verification-first, strictly extractive agricultu
 
 ---
 
-## 2. Experimental Benchmark Results
+## 2. Experimental Benchmark Results (100% Real GPU Data)
 
 ### A. Multilingual Dense Retrieval Benchmark (N = 711 Evaluation Queries)
 
@@ -52,7 +52,23 @@ Benchmarked on 711 balanced test queries (237 English, 237 Hindi, 237 Marathi) e
 
 ---
 
-### B. Critic Verification Layer: Selective Risk vs. Coverage Calibration
+### B. Vision Diagnoser & In-The-Wild Domain Gap Ablation (N = 3,128 Lab vs. N = 127 Wild Field)
+
+To evaluate real-world deployability, we benchmarked the vision classifier on both the canonical PlantVillage test set (in-vitro lab conditions) and the PlantDoc test set (in-the-wild farm conditions):
+
+| Model Backbone | Training Data | Epochs | PlantVillage In-Vitro Acc | PlantVillage Macro-F1 | PlantDoc In-The-Wild Acc | PlantDoc Wild Macro-F1 | CPU Latency | Parameters |
+|---|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| EfficientNet-B0 | PlantVillage Only (Lab) | 20 | 99.90% | 99.88% | 30.71% | 21.83% | 35.12 ± 3.6 ms | 4,025,482 |
+| **EfficientNet-B0** | **PV + PlantDoc (Adapted)** | **20** | **99.71%** | **99.66%** | **66.14%** (+115.4% rel.) | **63.44%** | **36.48 ± 3.5 ms** | **4,025,482** |
+
+> **Key Conclusions & Insights**:
+> 1. **The Laboratory Illusion**: Training purely on laboratory images (PlantVillage) yields an almost flawless 99.90% lab accuracy, but suffers severe **domain collapse (dropping to 30.71%)** on natural farm photos due to complex backgrounds, multi-leaf occlusions, and uncontrolled sunlight.
+> 2. **Field Adaptation Gain**: Joint training on in-the-wild PlantDoc samples more than doubles real-world field accuracy from **30.71% to 66.14%** and nearly triples Macro-F1 from **21.83% to 63.44%**, while maintaining 99.71% accuracy on clean images.
+> 3. **Need for Critic Verification**: Because real field conditions cause confidence degradation, the rule-based Critic layer is physically indispensable: it intercepts ambiguous low-margin predictions and disambiguates them through physical symptom questions.
+
+---
+
+### C. Critic Verification Layer: Selective Risk vs. Coverage Calibration
 
 Evaluated across 54 threshold combinations on 500 validation calibration samples (`results/critic_tuning_results.csv`):
 
@@ -66,7 +82,62 @@ Evaluated across 54 threshold combinations on 500 validation calibration samples
 
 ---
 
-## 3. Repository Structure
+## 3. How to Run the Web Demo
+
+The demo provides an interactive 3-pane Gradio interface with multilingual text/speech input and verified advisory cards.
+
+### Method 1: Local Desktop / Laptop Launch
+```bash
+# 1. Activate your virtual environment and install dependencies
+pip install -r requirements.txt
+
+# 2. Launch the Gradio web server
+python app_gradio.py --config configs/demo.yaml
+```
+- Open your browser and navigate to: **`http://localhost:7860`**
+- By default, if GPU weights are present in `checkpoints/`, it runs on GPU; otherwise, it automatically utilizes CPU mode.
+
+### Method 2: Google Colab Public Launch (Shareable Link)
+To run in Colab and generate a public link accessible from any smartphone or browser:
+```bash
+!python app_gradio.py --config configs/demo.yaml --share
+```
+- Gradio will display a public tunnel URL (e.g. `https://xxxx.gradio.live`) valid for 72 hours.
+
+### Method 3: Headless CLI Smoke Test (No Browser Needed)
+To verify the entire demo pipeline on CPU without opening a browser:
+```bash
+python app_gradio.py --smoke
+```
+This tests all 3 decision branches:
+- **Test 1 (ACCEPT)**: Clear English query $\rightarrow$ returns diagnosis + verified advice card.
+- **Test 2 (CLARIFY)**: Ambiguous Hindi query $\rightarrow$ presents physical symptom disambiguation question.
+- **Test 2b (RESOLVE)**: Simulates selecting Option A $\rightarrow$ resolves diagnosis and returns grounded advice.
+- **Test 3 (REFUSE)**: Blurry / OOD Marathi query $\rightarrow$ returns safe abstention with Marathi KVK referral.
+
+---
+
+### Step-by-Step Demo User Guide
+
+1. **Select Language**: Choose between `English`, `हिंदी (Hindi)`, or `मराठी (Marathi)` in the top dropdown.
+2. **Upload Leaf Photo (Left Pane)**:
+   - Upload any tomato, potato, corn, or grape leaf image.
+   - The left pane displays the model's top-2 diagnostic predictions and confidence margin.
+3. **Ask a Treatment Question (Center Pane)**:
+   - **Text**: Type your query (e.g., *"What fungicide should I spray and what is the dosage?"* or *"पत्तियों पर धब्बे दिख रहे हैं, कौन सी दवा छिड़कें?"*).
+   - **Voice**: Click the microphone icon to record your spoken question (transcribed by Whisper STT).
+4. **Interactive Clarification**:
+   - If the system detects a near-tie between two confusable diseases (e.g., Tomato Early Blight vs. Late Blight), the Critic will display **Option A** and **Option B** buttons describing distinctive physical symptoms.
+   - Click either option to resolve the ambiguity.
+5. **Inspect Verified Advisory Card (Right Pane)**:
+   - Displays **verbatim text** directly from the official ICAR / State Agricultural University PDF.
+   - Shows the exact **Document Title**, **Section**, and **Page Number**.
+   - Displays dosage alerts (e.g., *"Mancozeb 75 WP @ 2.5 g/L"*) and Pre-Harvest Interval (PHI) warnings.
+   - Click the audio player to listen to natural **spoken audio pronunciation** in your selected language via gTTS.
+
+---
+
+## 4. Repository Structure
 
 ```
 farmer_advisory_chatbot/
@@ -94,24 +165,28 @@ farmer_advisory_chatbot/
 │   └── pdfs/                         # Official ICAR / SAU extension manuals
 ├── logs/                             # Training loss & metric CSVs
 │   ├── retriever/e5_small_finetuned_seed42_metrics.csv
-│   └── vision/efficientnet_b0_plantvillage_seed42_metrics.csv
+│   ├── vision/efficientnet_b0_plantvillage_seed42_metrics.csv
+│   └── vision/efficientnet_b0_pv_pd_seed42_metrics.csv
 ├── notebooks/                        # Self-contained Google Colab notebooks
 │   ├── 01_data.ipynb                 # Ingestion & pair generation
 │   ├── 02_vision.ipynb               # Vision training on Colab T4 GPU
 │   ├── 03_retriever.ipynb            # Retriever fine-tuning with MNRL
 │   └── 04_eval_demo.ipynb            # Full benchmark evaluation & Gradio share
 ├── report_assets/                    # 300 DPI publication figures & LaTeX tables
-│   ├── ablation_table.csv            # Metric benchmark table
-│   ├── ablation_table.tex            # LaTeX booktabs formatted table
-│   ├── confusion_matrix.png/.pdf     # Confusable disease pair ambiguity matrix
-│   ├── methodology_diagram.png/.svg  # End-to-end pipeline flowchart
+│   ├── ablation_table.csv/.tex       # Multilingual retrieval ablation tables
+│   ├── vision_ablation_table.csv/.tex# Vision & domain gap ablation tables
+│   ├── domain_gap_ablation.png/.pdf  # PlantVillage vs. PlantDoc domain gap bar chart
+│   ├── confusion_matrix.png/.pdf     # Real in-field confusion matrix heatmaps
+│   ├── methodology_diagram.png/.svg  # End-to-end pipeline architecture diagram
 │   ├── retrieval_comparison_bar.png/.pdf # R@5 & MRR@10 comparison bar chart
 │   ├── retriever_loss_curve.png/.pdf # Retriever MNRL loss & MRR curves
 │   ├── selective_prediction_curve.png/.pdf # Critic coverage vs. risk tradeoff
-│   └── vision_loss_curve.png/.pdf    # Vision CE loss & accuracy curves
+│   └── vision_loss_curve.png/.pdf    # Real 20-epoch vision CE loss & accuracy curves
 ├── results/                          # Benchmark results CSV files
 │   ├── critic_tuning_results.csv     # 54 threshold calibration grid results
-│   └── retrieval_results.csv         # 711-query retrieval benchmark metrics
+│   ├── retrieval_results.csv         # 711-query retrieval benchmark metrics
+│   ├── efficientnet_b0_plantvillage_seed42_preds_plantdoc_test.csv
+│   └── efficientnet_b0_pv_pd_seed42_preds_plantdoc_test.csv
 ├── scripts/                          # Utility & submission packaging scripts
 │   ├── package.py                    # Cross-platform submission packager
 │   ├── package.sh                    # Linux/macOS submission script
@@ -129,67 +204,7 @@ farmer_advisory_chatbot/
 
 ---
 
-## 4. Quick Start & Reproduction
-
-### Prerequisites
-- Python 3.10+ (tested on Python 3.11 & 3.13)
-- PyTorch 2.0+ (CUDA recommended for training; CPU supported for smoke tests and inference)
-
-### Installation
-```bash
-git clone https://github.com/Blitzkrieg28/farmer_advisory_chatbot.git
-cd farmer_advisory_chatbot
-pip install -r requirements.txt
-```
-
-### Option A: Local CPU Smoke Test (< 60 Seconds)
-Verify the entire pipeline end-to-end on CPU without downloading large datasets:
-
-```bash
-# 1. Test Retriever Smoke Mode
-python train_retriever.py --config configs/retriever.yaml --smoke
-
-# 2. Test Critic Layer Calibration
-python eval/tune_critic.py --config configs/critic.yaml --smoke
-
-# 3. Test Full Pipeline & Gradio Demo Logic
-python app_gradio.py --smoke
-
-# 4. Regenerate All Report Figures & Tables
-python make_figures.py
-```
-
-### Option B: Google Colab T4 Training (Full Models)
-Open and run the notebooks in order:
-1. `notebooks/01_data.ipynb`: Ingests official extension PDFs and generates multilingual queries.
-2. `notebooks/02_vision.ipynb`: Trains `EfficientNet-B0` on PlantVillage (10 epochs, ~25 min).
-3. `notebooks/03_retriever.ipynb`: Fine-tunes `multilingual-e5-small` with MNRL (5 epochs, ~12 min).
-4. `notebooks/04_eval_demo.ipynb`: Runs full benchmark evaluation and launches shareable Gradio URL.
-
----
-
-## 5. Launching the Gradio Web Demo
-
-```bash
-# Local development launch
-python app_gradio.py --config configs/demo.yaml
-
-# Public Colab tunnel launch
-python app_gradio.py --config configs/demo.yaml --share
-```
-
-The Gradio interface features:
-- **Left Pane**: Upload leaf photo, preview diagnostic top-2 predictions and confidence margin.
-- **Center Pane**: Multilingual conversation history in English, Hindi, or Marathi with microphone STT input and dynamic Option A / Option B clarification buttons.
-- **Right Pane**: Grounded Advisory Card displaying:
-  - Verbatim text from official ICAR/State Agriculture University extension PDF
-  - Exact source document name, section title, and page number
-  - Chemical dosage tags and safety warnings
-  - Audio playback button via gTTS
-
----
-
-## 6. Regenerating Report Figures & Tables
+## 5. Regenerating Report Figures & Tables
 
 All report assets are programmatically reproducible from the underlying experiment CSV logs:
 
@@ -198,17 +213,19 @@ python make_figures.py
 ```
 
 This outputs 300 DPI figures in both raster (PNG) and vector (PDF / SVG) formats under `report_assets/`:
-- `report_assets/methodology_diagram.{png,svg}`: Pipeline architecture diagram.
-- `report_assets/vision_loss_curve.{png,pdf}`: Training/validation loss and accuracy curves.
-- `report_assets/retriever_loss_curve.{png,pdf}`: MNRL training loss and validation MRR@10 curves.
-- `report_assets/retrieval_comparison_bar.{png,pdf}`: R@5 and MRR@10 across languages with 95% CIs.
-- `report_assets/selective_prediction_curve.{png,pdf}`: Selective risk vs. coverage tradeoff.
-- `report_assets/confusion_matrix.{png,pdf}`: Confusable pair ambiguity heatmap.
-- `report_assets/ablation_table.{csv,tex}`: Complete LaTeX `booktabs` and CSV benchmark tables.
+- `report_assets/methodology_diagram.{png,svg}`: Pipeline architecture flowchart.
+- `report_assets/vision_loss_curve.{png,pdf}`: Real 20-epoch training/validation loss and accuracy curves.
+- `report_assets/retriever_loss_curve.{png,pdf}`: Real 5-epoch MNRL training loss and validation MRR@10 curves.
+- `report_assets/domain_gap_ablation.{png,pdf}`: PlantVillage vs. PlantDoc laboratory vs. wild field accuracy.
+- `report_assets/confusion_matrix.{png,pdf}`: Real in-field confusion heatmaps comparing PV vs. PV+PD models.
+- `report_assets/retrieval_comparison_bar.{png,pdf}`: R@5 and MRR@10 across languages with 95% bootstrap CIs.
+- `report_assets/selective_prediction_curve.{png,pdf}`: Selective risk vs. coverage tradeoff curve.
+- `report_assets/ablation_table.{csv,tex}`: Complete LaTeX `booktabs` and CSV retrieval benchmark tables.
+- `report_assets/vision_ablation_table.{csv,tex}`: Complete LaTeX `booktabs` and CSV vision domain gap tables.
 
 ---
 
-## 7. Packaging for Academic Submission
+## 6. Packaging for Academic Submission
 
 To build the submission zip archive (excluding large raw images, checkpoints, `.git`, and cache files):
 
@@ -226,7 +243,7 @@ Outputs: `Group01_code_Farmer_Advisory_Chatbot_Multilingual_NLP.zip` (~37 MB).
 
 ---
 
-## 8. Academic References
+## 7. Academic References
 
 1. **PlantVillage Dataset**:
    Mohanty, S. P., Hughes, D. P., & Salathé, M. (2016). *Using deep learning for image-based plant disease detection.* Frontiers in Plant Science, 7, 1419.
@@ -240,10 +257,3 @@ Outputs: `Group01_code_Farmer_Advisory_Chatbot_Multilingual_NLP.zip` (~37 MB).
    Radford, A., Kim, J. W., Xu, T., Brockman, G., McLeavey, C., & Sutskever, I. (2023). *Robust Speech Recognition via Large-Scale Weak Supervision.* ICML 2023.
 6. **NLLB Multilingual Translation**:
    NLLB Team. (2022). *No Language Left Behind: Scaling Human-Centered Machine Translation.* arXiv:2207.04672.
-
----
-
-## 9. License & Integrity
-
-- **Extractive Attribution**: All agronomic advice chunks are attributed to public domain extension publications from ICAR and State Agricultural Universities.
-- **Academic Submission**: Developed as a final capstone project.

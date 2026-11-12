@@ -1,0 +1,68 @@
+{
+  "run_name": "e5_small_finetuned_seed42",
+  "seed": 42,
+  "mode": "real",
+  "device": "cuda",
+  "python_version": "3.13.16 (main, Oct  1 2026, 15:40:24) [GCC 13.3.0]",
+  "torch_version": "2.14.1+cu130",
+  "platform": "Linux-6.6.159+-x86_64-with-glibc2.39",
+  "config": {
+    "experiment_name": "e5_small_finetuned",
+    "seed": 42,
+    "model": {
+      "name": "intfloat/multilingual-e5-small",
+      "max_seq_length": 256,
+      "query_prefix": "query: ",
+      "passage_prefix": "passage: "
+    },
+    "data": {
+      "train_pairs": "data/retrieval_train.csv",
+      "val_pairs": "data/retrieval_val.csv",
+      "test_queries": "data/test_queries_template.csv",
+      "kb_chunks": "kb/chunks.jsonl",
+      "kb_path_legacy": "kb/passages.json"
+    },
+    "training": {
+      "epochs": 5,
+      "batch_size": 64,
+      "lr": 2e-05,
+      "warmup_ratio": 0.1,
+      "loss": "MultipleNegativesRankingLoss",
+      "hard_negatives": false,
+      "amp": true,
+      "drop_last": true,
+      "max_grad_norm": 1.0
+    },
+    "checkpoint": {
+      "save_dir": "checkpoints/retriever",
+      "save_every_epoch": true,
+      "resume": null
+    },
+    "logging": {
+      "log_dir": "logs/retriever",
+      "metrics_csv_template": "logs/retriever/{exp_name}_seed{seed}_metrics.csv"
+    },
+    "evaluation": {
+      "top_k": [
+        1,
+        5,
+        10
+      ],
+      "languages": [
+        "en",
+        "hi",
+        "mr"
+      ],
+      "bootstrap_ci_n": 1000
+    },
+    "smoke": {
+      "epochs": 1,
+      "batch_size": 4,
+      "max_pairs": 20
+    }
+  },
+  "epochs": 5,
+  "batch_size": 64,
+  "lr": 2e-05,
+  "timestamp": "2026-11-12T15:36:57.211013+00:00"
+}

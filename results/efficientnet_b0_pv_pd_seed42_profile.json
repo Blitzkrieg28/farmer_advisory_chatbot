@@ -1,0 +1,25 @@
+{
+  "run_name": "efficientnet_b0_pv_pd_seed42",
+  "backbone": "efficientnet_b0",
+  "backbone_variant": "efficientnet_b0",
+  "seed": 42,
+  "num_classes": 14,
+  "is_smoke": false,
+  "profile": {
+    "mean_latency_ms": 36.48,
+    "std_latency_ms": 3.54,
+    "total_parameters": 4025482,
+    "trainable_parameters": 4025482,
+    "benchmark_iterations": 30,
+    "cpu_threads_used": 1,
+    "hardware_metadata": {
+      "platform": "Linux-6.6.159+-x86_64-with-glibc2.39",
+      "processor": "x86_64",
+      "machine": "x86_64",
+      "python_version": "3.13.16"
+    }
+  },
+  "best_val_loss": 0.011642368885812274,
+  "metrics_csv": "/content/drive/MyDrive/farmer_advisory_chatbot/logs/vision/efficientnet_b0_pv_pd_seed42_metrics.csv",
+  "best_checkpoint": "/content/drive/MyDrive/farmer_advisory_chatbot/checkpoints/vision/efficientnet_b0_pv_pd_seed42_best.pth"
+}
