@@ -1,0 +1,41 @@
+# Farmer Advisory Chatbot - Requirements
+# Install: pip install -r requirements.txt
+# For Colab: see notebooks/ for additional setup instructions
+
+# ---- Core ML ----
+torch>=2.1.0
+torchvision>=0.16.0
+timm>=0.9.12
+sentence-transformers>=2.2.2
+
+# ---- Data & Evaluation ----
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.3.0
+Pillow>=10.0.0
+imagehash>=4.3.1
+
+# ---- Visualization ----
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# ---- NLP / Retrieval / PDF Processing ----
+transformers>=4.35.0
+sentencepiece>=0.1.99
+pymupdf>=1.24.0
+pdfplumber>=0.11.0
+rank-bm25>=0.2.2
+
+# ---- Speech ----
+# openai-whisper>=20231117  # uncomment for local whisper; Colab uses transformers pipeline
+gtts>=2.5.0
+
+# ---- Demo UI ----
+gradio>=4.0.0
+
+# ---- Config ----
+pyyaml>=6.0
+
+# ---- Reproducibility ----
+tqdm>=4.65.0
+

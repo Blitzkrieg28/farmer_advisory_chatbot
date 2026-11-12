@@ -1,0 +1,64 @@
+# Vision Model Configuration: MobileNetV3-Small (ablation)
+experiment_name: "mobilenetv3_plantvillage"
+seed: 42
+
+model:
+  backbone: "mobilenetv3_small_100"
+  backbone_variant: "mobilenetv3_small_100"
+  pretrained: true
+  num_classes: 14
+  drop_rate: 0.2
+
+data:
+  train_csv: "data/vision_train.csv"
+  val_csv: "data/vision_val.csv"
+  test_csv: "data/vision_test.csv"
+  plantdoc_test_csv: "data/plantdoc_test.csv"
+  image_size: 224
+  num_workers: 2
+  split_ratios:
+    train: 0.70
+    val: 0.15
+    test: 0.15
+  dedup:
+    method: "dhash"
+    threshold: 4
+  max_images_per_class: null
+
+augmentation:
+  enabled: true
+  random_resized_crop:
+    size: 224
+    scale: [0.7, 1.0]
+  horizontal_flip: true
+  vertical_flip: false
+  color_jitter:
+    brightness: 0.3
+    contrast: 0.3
+    saturation: 0.2
+    hue: 0.1
+  gaussian_blur:
+    kernel_size: 3
+    sigma: [0.1, 2.0]
+    probability: 0.3
+
+training:
+  epochs: 20
+  batch_size: 32
+  optimizer: "adamw"
+  lr: 3.0e-4
+  weight_decay: 1.0e-4
+  scheduler: "cosine"
+  warmup_epochs: 1
+  amp: true
+  gradient_clip_max_norm: 1.0
+  imbalance_strategy: "weighted_loss"
+
+checkpoint:
+  save_dir: "checkpoints/vision"
+  save_every_epoch: true
+  resume: null
+
+logging:
+  log_dir: "logs/vision"
+  metrics_csv: "logs/vision/metrics_mobilenetv3.csv"

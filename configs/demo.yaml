@@ -1,0 +1,13 @@
+# Demo / App Configuration
+demo:
+  whisper_model: "openai/whisper-small"
+  nllb_model: "facebook/nllb-200-distilled-600M"
+  tts_engine: "gtts"           # "gtts" or "mms_tts"
+  supported_languages: ["en", "hi", "mr"]
+  vision_checkpoint: "checkpoints/vision/best_model.pth"
+  retriever_checkpoint: "checkpoints/retriever/best_model/"
+  kb_path: "kb/passages.json"
+  critic_config: "configs/critic.yaml"
+  gradio:
+    server_port: 7860
+    share: false

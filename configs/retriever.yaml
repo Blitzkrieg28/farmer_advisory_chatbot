@@ -1,0 +1,51 @@
+# Retriever Configuration: multilingual-e5-small fine-tuning
+experiment_name: "e5_small_finetuned"
+seed: 42
+
+model:
+  name: "intfloat/multilingual-e5-small"
+  max_seq_length: 256
+  # Prefixes required by multilingual-e5 at inference time
+  query_prefix: "query: "
+  passage_prefix: "passage: "
+
+data:
+  # Phase 4: queries generated from PDF chunks (generate_queries.py)
+  train_pairs: "data/retrieval_train.csv"
+  val_pairs: "data/retrieval_val.csv"
+  test_queries: "data/test_queries_template.csv"
+  # Phase 4 KB: PDF-grounded chunks (replaces kb/passages.json)
+  kb_chunks: "kb/chunks.jsonl"
+  # Legacy hand-written KB kept for reference; not used in training
+  kb_path_legacy: "kb/passages.json"
+
+training:
+  epochs: 5
+  batch_size: 64
+  lr: 2.0e-5
+  warmup_ratio: 0.1
+  loss: "MultipleNegativesRankingLoss"
+  hard_negatives: false           # set true to use in-batch hard negatives if available
+  amp: true                       # fp16 mixed precision on GPU (ignored on CPU)
+  drop_last: true                 # drop incomplete batches for stable MNRL loss
+  max_grad_norm: 1.0
+
+checkpoint:
+  save_dir: "checkpoints/retriever"
+  save_every_epoch: true
+  resume: null                    # path to checkpoint to resume from (--resume flag overrides)
+
+logging:
+  log_dir: "logs/retriever"
+  # NOTE: actual filename includes seed, e.g. logs/retriever/e5_small_finetuned_seed42_metrics.csv
+  metrics_csv_template: "logs/retriever/{exp_name}_seed{seed}_metrics.csv"
+
+evaluation:
+  top_k: [1, 5, 10]
+  languages: ["en", "hi", "mr"]
+  bootstrap_ci_n: 1000            # bootstrap iterations for 95% CI
+
+smoke:
+  epochs: 1
+  batch_size: 4
+  max_pairs: 20                   # tiny dataset for CPU smoke test

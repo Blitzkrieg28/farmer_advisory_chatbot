@@ -1,0 +1,64 @@
+# Vision Model Configuration: EfficientNet-B0 (primary)
+experiment_name: "efficientnet_b0_plantvillage"
+seed: 42
+
+model:
+  backbone: "efficientnet_b0"        # timm model name
+  backbone_variant: "efficientnet_b0"
+  pretrained: true                    # ImageNet pretrained
+  num_classes: 14                     # 14 shared classes across 4 crops
+  drop_rate: 0.2
+
+data:
+  train_csv: "data/vision_train.csv"
+  val_csv: "data/vision_val.csv"
+  test_csv: "data/vision_test.csv"
+  plantdoc_test_csv: "data/plantdoc_test.csv"
+  image_size: 224
+  num_workers: 2
+  split_ratios:
+    train: 0.70
+    val: 0.15
+    test: 0.15
+  dedup:
+    method: "dhash"
+    threshold: 4                     # Hamming distance threshold for dedup
+  max_images_per_class: null         # null for full data, or int to cap for Colab
+
+augmentation:
+  enabled: true
+  random_resized_crop:
+    size: 224
+    scale: [0.7, 1.0]
+  horizontal_flip: true
+  vertical_flip: false
+  color_jitter:
+    brightness: 0.3
+    contrast: 0.3
+    saturation: 0.2
+    hue: 0.1
+  gaussian_blur:
+    kernel_size: 3
+    sigma: [0.1, 2.0]
+    probability: 0.3
+
+training:
+  epochs: 20
+  batch_size: 32
+  optimizer: "adamw"
+  lr: 3.0e-4                          # Changed from 1e-3 to 3e-4 for fine-tuning stability
+  weight_decay: 1.0e-4
+  scheduler: "cosine"
+  warmup_epochs: 1                    # 1-epoch linear warmup
+  amp: true                           # automatic mixed precision on GPU
+  gradient_clip_max_norm: 1.0
+  imbalance_strategy: "weighted_loss" # "weighted_loss" | "weighted_sampler" | "none"
+
+checkpoint:
+  save_dir: "checkpoints/vision"
+  save_every_epoch: true
+  resume: null                        # path to checkpoint to resume from
+
+logging:
+  log_dir: "logs/vision"
+  metrics_csv: "logs/vision/metrics_efficientnet_b0.csv"

@@ -1,0 +1,122 @@
+{
+  "metadata": {
+    "description": "Verified mapping between PlantVillage and PlantDoc class names for shared classes",
+    "note": "Classes verified against spMohanty/PlantVillage-Dataset and pratikkayal/PlantDoc-Dataset official repositories.",
+    "num_classes": 14,
+    "crops": ["Tomato", "Potato", "Corn", "Grape"]
+  },
+  "classes": [
+    {
+      "class_id": 0,
+      "unified_name": "Tomato_Bacterial_Spot",
+      "plantvillage_name": "Tomato___Bacterial_spot",
+      "plantdoc_name": "Tomato leaf bacterial spot",
+      "crop": "Tomato",
+      "disease": "Bacterial Spot"
+    },
+    {
+      "class_id": 1,
+      "unified_name": "Tomato_Early_Blight",
+      "plantvillage_name": "Tomato___Early_blight",
+      "plantdoc_name": "Tomato Early blight leaf",
+      "crop": "Tomato",
+      "disease": "Early Blight"
+    },
+    {
+      "class_id": 2,
+      "unified_name": "Tomato_Late_Blight",
+      "plantvillage_name": "Tomato___Late_blight",
+      "plantdoc_name": "Tomato leaf late blight",
+      "crop": "Tomato",
+      "disease": "Late Blight"
+    },
+    {
+      "class_id": 3,
+      "unified_name": "Tomato_Leaf_Mold",
+      "plantvillage_name": "Tomato___Leaf_Mold",
+      "plantdoc_name": "Tomato mold leaf",
+      "crop": "Tomato",
+      "disease": "Leaf Mold"
+    },
+    {
+      "class_id": 4,
+      "unified_name": "Tomato_Septoria_Leaf_Spot",
+      "plantvillage_name": "Tomato___Septoria_leaf_spot",
+      "plantdoc_name": "Tomato Septoria leaf spot",
+      "crop": "Tomato",
+      "disease": "Septoria Leaf Spot"
+    },
+    {
+      "class_id": 5,
+      "unified_name": "Tomato_Yellow_Leaf_Curl_Virus",
+      "plantvillage_name": "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+      "plantdoc_name": "Tomato leaf yellow virus",
+      "crop": "Tomato",
+      "disease": "Yellow Leaf Curl Virus"
+    },
+    {
+      "class_id": 6,
+      "unified_name": "Tomato_Mosaic_Virus",
+      "plantvillage_name": "Tomato___Tomato_mosaic_virus",
+      "plantdoc_name": "Tomato leaf mosaic virus",
+      "crop": "Tomato",
+      "disease": "Mosaic Virus"
+    },
+    {
+      "class_id": 7,
+      "unified_name": "Tomato_Healthy",
+      "plantvillage_name": "Tomato___healthy",
+      "plantdoc_name": "Tomato leaf",
+      "crop": "Tomato",
+      "disease": "Healthy"
+    },
+    {
+      "class_id": 8,
+      "unified_name": "Potato_Early_Blight",
+      "plantvillage_name": "Potato___Early_blight",
+      "plantdoc_name": "Potato leaf early blight",
+      "crop": "Potato",
+      "disease": "Early Blight"
+    },
+    {
+      "class_id": 9,
+      "unified_name": "Potato_Late_Blight",
+      "plantvillage_name": "Potato___Late_blight",
+      "plantdoc_name": "Potato leaf late blight",
+      "crop": "Potato",
+      "disease": "Late Blight"
+    },
+    {
+      "class_id": 10,
+      "unified_name": "Corn_Common_Rust",
+      "plantvillage_name": "Corn_(maize)___Common_rust_",
+      "plantdoc_name": "Corn rust leaf",
+      "crop": "Corn",
+      "disease": "Common Rust"
+    },
+    {
+      "class_id": 11,
+      "unified_name": "Corn_Northern_Leaf_Blight",
+      "plantvillage_name": "Corn_(maize)___Northern_Leaf_Blight",
+      "plantdoc_name": "Corn leaf blight",
+      "crop": "Corn",
+      "disease": "Northern Leaf Blight"
+    },
+    {
+      "class_id": 12,
+      "unified_name": "Grape_Black_Rot",
+      "plantvillage_name": "Grape___Black_rot",
+      "plantdoc_name": "grape leaf black rot",
+      "crop": "Grape",
+      "disease": "Black Rot"
+    },
+    {
+      "class_id": 13,
+      "unified_name": "Grape_Healthy",
+      "plantvillage_name": "Grape___healthy",
+      "plantdoc_name": "grape leaf",
+      "crop": "Grape",
+      "disease": "Healthy"
+    }
+  ]
+}

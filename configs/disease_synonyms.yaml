@@ -1,0 +1,326 @@
+# configs/disease_synonyms.yaml
+# Disease synonym list for keyword tagging of PDF chunks.
+# Used by data_prep/ingest_pdfs.py for crop_tags and disease_tags columns.
+#
+# ALL entries marked TODO_VERIFY — check each scientific name, common name,
+# and Hindi/Marathi translation before submitting the final report.
+# Sources to verify against: ICAR crop-protection circulars, CABI Crop Protection Compendium,
+# and state agricultural university extension bulletins.
+#
+# Schema per entry:
+#   class_id      : integer (matches class_mapping.json)
+#   unified_name  : string (matches class_mapping.json)
+#   crop          : string
+#   disease       : string
+#   scientific    : list of scientific names (TODO_VERIFY)
+#   common_en     : list of English common names / abbreviations
+#   common_hi     : list of Hindi names / transliterations (TODO_VERIFY)
+#   common_mr     : list of Marathi names / transliterations (TODO_VERIFY)
+#   is_healthy    : bool (true means no treatment chunks expected)
+
+diseases:
+  - class_id: 0
+    unified_name: "Tomato_Bacterial_Spot"
+    crop: "Tomato"
+    disease: "Bacterial Spot"
+    scientific:
+      - "Xanthomonas campestris pv. vesicatoria"   # TODO_VERIFY species epithet
+      - "Xanthomonas euvesicatoria"                 # TODO_VERIFY (reclassified species)
+      - "Xanthomonas gardneri"                      # TODO_VERIFY
+      - "Xanthomonas perforans"                     # TODO_VERIFY
+    common_en:
+      - "bacterial spot"
+      - "bacterial leaf spot"
+      - "bacterial speck"                            # NOTE: different disease; include for fuzzy match TODO_VERIFY
+      - "tomato bacterial spot"
+      - "leaf spot tomato"
+    common_hi:
+      - "टमाटर जीवाणु धब्बा"                        # TODO_VERIFY
+      - "बैक्टीरियल स्पॉट"                           # TODO_VERIFY
+      - "टमाटर धब्बा रोग"                            # TODO_VERIFY
+    common_mr:
+      - "टोमॅटो जिवाणू ठिपके"                        # TODO_VERIFY
+      - "बॅक्टेरियल स्पॉट टोमॅटो"                    # TODO_VERIFY
+    is_healthy: false
+
+  - class_id: 1
+    unified_name: "Tomato_Early_Blight"
+    crop: "Tomato"
+    disease: "Early Blight"
+    scientific:
+      - "Alternaria solani"                          # TODO_VERIFY
+      - "Alternaria alternata"                       # TODO_VERIFY (sometimes implicated)
+    common_en:
+      - "early blight"
+      - "tomato early blight"
+      - "alternaria blight"
+      - "target spot"
+    common_hi:
+      - "अगेती झुलसा"                               # TODO_VERIFY
+      - "टमाटर अल्टरनेरिया"                           # TODO_VERIFY
+      - "शुरुआती अंगमारी"                             # TODO_VERIFY
+    common_mr:
+      - "लवकर करपा"                                  # TODO_VERIFY
+      - "टोमॅटो अर्ली ब्लाईट"                         # TODO_VERIFY
+    is_healthy: false
+
+  - class_id: 2
+    unified_name: "Tomato_Late_Blight"
+    crop: "Tomato"
+    disease: "Late Blight"
+    scientific:
+      - "Phytophthora infestans"                     # TODO_VERIFY
+    common_en:
+      - "late blight"
+      - "tomato late blight"
+      - "phytophthora blight"
+      - "potato late blight"                         # same pathogen affects potato
+    common_hi:
+      - "पछेती झुलसा"                               # TODO_VERIFY
+      - "टमाटर फाइटोफ्थोरा"                           # TODO_VERIFY
+      - "देर से अंगमारी"                              # TODO_VERIFY
+    common_mr:
+      - "उशिरा करपा"                                 # TODO_VERIFY
+      - "फायटोफ्थोरा करपा"                            # TODO_VERIFY
+    is_healthy: false
+
+  - class_id: 3
+    unified_name: "Tomato_Leaf_Mold"
+    crop: "Tomato"
+    disease: "Leaf Mold"
+    scientific:
+      - "Passalora fulva"                            # TODO_VERIFY (syn. Cladosporium fulvum, Fulvia fulva)
+      - "Cladosporium fulvum"                        # TODO_VERIFY (older synonym)
+      - "Fulvia fulva"                               # TODO_VERIFY
+    common_en:
+      - "leaf mold"
+      - "tomato leaf mold"
+      - "cladosporium leaf mold"
+    common_hi:
+      - "पत्ती फफूंद"                                # TODO_VERIFY
+      - "टमाटर पर्णकंद"                               # TODO_VERIFY
+      - "लीफ मोल्ड"                                   # TODO_VERIFY
+    common_mr:
+      - "पान बुरशी"                                  # TODO_VERIFY
+      - "लीफ मोल्ड टोमॅटो"                            # TODO_VERIFY
+    is_healthy: false
+
+  - class_id: 4
+    unified_name: "Tomato_Septoria_Leaf_Spot"
+    crop: "Tomato"
+    disease: "Septoria Leaf Spot"
+    scientific:
+      - "Septoria lycopersici"                       # TODO_VERIFY
+    common_en:
+      - "septoria leaf spot"
+      - "tomato septoria"
+      - "septoria blight"
+    common_hi:
+      - "सेप्टोरिया पत्ती धब्बा"                      # TODO_VERIFY
+      - "सेप्टोरिया झुलसा"                            # TODO_VERIFY
+    common_mr:
+      - "सेप्टोरिया पान ठिपके"                         # TODO_VERIFY
+    is_healthy: false
+
+  - class_id: 5
+    unified_name: "Tomato_Yellow_Leaf_Curl_Virus"
+    crop: "Tomato"
+    disease: "Yellow Leaf Curl Virus"
+    scientific:
+      - "Tomato yellow leaf curl virus"              # TODO_VERIFY
+      - "TYLCV"                                      # abbreviation
+    common_en:
+      - "yellow leaf curl"
+      - "TYLCV"
+      - "tomato yellow leaf curl"
+      - "leaf curl virus"
+    common_hi:
+      - "पत्ती मरोड़ विषाणु"                          # TODO_VERIFY
+      - "टमाटर पीला पत्ती मरोड़"                       # TODO_VERIFY
+      - "TYLCV"
+    common_mr:
+      - "पान गुंडाळणे विषाणू"                          # TODO_VERIFY
+      - "टोमॅटो TYLCV"                               # TODO_VERIFY
+    is_healthy: false
+
+  - class_id: 6
+    unified_name: "Tomato_Mosaic_Virus"
+    crop: "Tomato"
+    disease: "Mosaic Virus"
+    scientific:
+      - "Tomato mosaic virus"                        # TODO_VERIFY
+      - "ToMV"                                       # abbreviation
+      - "Tobacco mosaic virus"                       # TODO_VERIFY (can infect tomato)
+      - "TMV"                                        # abbreviation
+    common_en:
+      - "mosaic virus"
+      - "ToMV"
+      - "TMV"
+      - "tomato mosaic"
+      - "tobacco mosaic"
+    common_hi:
+      - "मोज़ेक विषाणु"                               # TODO_VERIFY
+      - "टमाटर मोज़ेक"                                # TODO_VERIFY
+      - "ToMV"
+    common_mr:
+      - "मोझॅक विषाणू"                                # TODO_VERIFY
+      - "ToMV टोमॅटो"                                # TODO_VERIFY
+    is_healthy: false
+
+  - class_id: 7
+    unified_name: "Tomato_Healthy"
+    crop: "Tomato"
+    disease: "Healthy"
+    scientific: []
+    common_en:
+      - "healthy tomato"
+      - "tomato healthy"
+    common_hi:
+      - "स्वस्थ टमाटर"                               # TODO_VERIFY
+    common_mr:
+      - "निरोगी टोमॅटो"                               # TODO_VERIFY
+    is_healthy: true
+
+  - class_id: 8
+    unified_name: "Potato_Early_Blight"
+    crop: "Potato"
+    disease: "Early Blight"
+    scientific:
+      - "Alternaria solani"                          # TODO_VERIFY
+    common_en:
+      - "potato early blight"
+      - "early blight"
+      - "alternaria"
+      - "alternaria blight"
+    common_hi:
+      - "आलू अगेती झुलसा"                            # TODO_VERIFY
+      - "आलू अल्टरनेरिया"                              # TODO_VERIFY
+    common_mr:
+      - "बटाटा लवकर करपा"                             # TODO_VERIFY
+    is_healthy: false
+
+  - class_id: 9
+    unified_name: "Potato_Late_Blight"
+    crop: "Potato"
+    disease: "Late Blight"
+    scientific:
+      - "Phytophthora infestans"                     # TODO_VERIFY
+    common_en:
+      - "potato late blight"
+      - "late blight"
+      - "phytophthora"
+    common_hi:
+      - "आलू पछेती झुलसा"                            # TODO_VERIFY
+      - "आलू फाइटोफ्थोरा"                              # TODO_VERIFY
+    common_mr:
+      - "बटाटा उशिरा करपा"                            # TODO_VERIFY
+    is_healthy: false
+
+  - class_id: 10
+    unified_name: "Corn_Common_Rust"
+    crop: "Corn"
+    disease: "Common Rust"
+    scientific:
+      - "Puccinia sorghi"                            # TODO_VERIFY
+    common_en:
+      - "corn rust"
+      - "common rust"
+      - "maize rust"
+      - "southern rust"
+    common_hi:
+      - "मक्का सामान्य रतुआ"                          # TODO_VERIFY
+      - "मकई रस्ट"                                    # TODO_VERIFY
+    common_mr:
+      - "मका सामान्य गंज"                              # TODO_VERIFY
+      - "कॉर्न रस्ट"                                   # TODO_VERIFY
+    is_healthy: false
+
+  - class_id: 11
+    unified_name: "Corn_Northern_Leaf_Blight"
+    crop: "Corn"
+    disease: "Northern Leaf Blight"
+    scientific:
+      - "Exserohilum turcicum"                       # TODO_VERIFY
+      - "Helminthosporium turcicum"                  # TODO_VERIFY (older synonym)
+      - "Setosphaeria turcica"                       # TODO_VERIFY (teleomorph)
+    common_en:
+      - "northern leaf blight"
+      - "NLB"
+      - "turcicum blight"
+      - "corn leaf blight"
+      - "maize northern leaf blight"
+    common_hi:
+      - "मक्का उत्तरी पत्ती अंगमारी"                 # TODO_VERIFY
+      - "NLB मकई"                                     # TODO_VERIFY
+    common_mr:
+      - "मका उत्तरीय पान करपा"                        # TODO_VERIFY
+      - "NLB"
+    is_healthy: false
+
+  - class_id: 12
+    unified_name: "Grape_Black_Rot"
+    crop: "Grape"
+    disease: "Black Rot"
+    scientific:
+      - "Guignardia bidwellii"                       # TODO_VERIFY
+      - "Guignardia bidwelli"                        # common variant with single 'i'
+      - "Phyllosticta ampelicida"                    # TODO_VERIFY (anamorph)
+    common_en:
+      - "grape black rot"
+      - "black rot"
+      - "guignardia"
+    common_hi:
+      - "अंगूर काला सड़न"                             # TODO_VERIFY
+      - "ब्लैक रॉट"                                   # TODO_VERIFY
+    common_mr:
+      - "द्राक्ष काळी कूज"                             # TODO_VERIFY
+      - "ब्लॅक रॉट"                                   # TODO_VERIFY
+    is_healthy: false
+
+  - class_id: 13
+    unified_name: "Grape_Healthy"
+    crop: "Grape"
+    disease: "Healthy"
+    scientific: []
+    common_en:
+      - "healthy grape"
+      - "grape healthy"
+    common_hi:
+      - "स्वस्थ अंगूर"                               # TODO_VERIFY
+    common_mr:
+      - "निरोगी द्राक्ष"                               # TODO_VERIFY
+    is_healthy: true
+
+# Crop-level keywords (for chunk tagging when disease not identified but crop is)
+crops:
+  Tomato:
+    en: ["tomato", "lycopersicon", "solanum lycopersicum"]
+    hi: ["टमाटर"]    # TODO_VERIFY
+    mr: ["टोमॅटो"]   # TODO_VERIFY
+  Potato:
+    en: ["potato", "solanum tuberosum"]
+    hi: ["आलू", "बटाटा"]   # TODO_VERIFY
+    mr: ["बटाटा", "आलू"]   # TODO_VERIFY
+  Corn:
+    en: ["corn", "maize", "zea mays"]
+    hi: ["मक्का", "मकई", "भुट्टा"]   # TODO_VERIFY
+    mr: ["मका", "भुट्टा"]              # TODO_VERIFY
+  Grape:
+    en: ["grape", "grapevine", "vitis vinifera", "vitis"]
+    hi: ["अंगूर"]           # TODO_VERIFY
+    mr: ["द्राक्ष"]          # TODO_VERIFY
+
+# Dosage regex patterns used by ingest_pdfs.py has_dosage field
+# These are patterns only; never fill in actual doses without a source document.
+dosage_patterns:
+  - "\\d+\\s*g/ha"
+  - "\\d+\\.?\\d*\\s*kg/ha"
+  - "\\d+\\.?\\d*\\s*ml/l"
+  - "\\d+\\.?\\d*\\s*L/ha"
+  - "\\d+\\s*ppm"
+  - "PHI\\s*:?\\s*\\d+"
+  - "\\d+\\s*days\\s*(before|after)\\s*harvest"
+  - "\\d+\\s*WDH"              # weeks before harvest TODO_VERIFY abbreviation
+  - "\\d+\\s*DAT"              # days after transplant TODO_VERIFY
+  - "\\d+\\s*%\\s*(WP|SC|EC)"  # formulation concentrations
+

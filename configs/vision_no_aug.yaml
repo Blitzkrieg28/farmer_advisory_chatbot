@@ -1,0 +1,50 @@
+# Vision Model Configuration: EfficientNet-B0 WITHOUT augmentation (ablation)
+experiment_name: "efficientnet_b0_no_aug"
+seed: 42
+
+model:
+  backbone: "efficientnet_b0"
+  backbone_variant: "efficientnet_b0"
+  pretrained: true
+  num_classes: 14
+  drop_rate: 0.2
+
+data:
+  train_csv: "data/vision_train.csv"
+  val_csv: "data/vision_val.csv"
+  test_csv: "data/vision_test.csv"
+  plantdoc_test_csv: "data/plantdoc_test.csv"
+  image_size: 224
+  num_workers: 2
+  split_ratios:
+    train: 0.70
+    val: 0.15
+    test: 0.15
+  dedup:
+    method: "dhash"
+    threshold: 4
+  max_images_per_class: null
+
+augmentation:
+  enabled: false    # disabled for this ablation
+
+training:
+  epochs: 20
+  batch_size: 32
+  optimizer: "adamw"
+  lr: 3.0e-4
+  weight_decay: 1.0e-4
+  scheduler: "cosine"
+  warmup_epochs: 1
+  amp: true
+  gradient_clip_max_norm: 1.0
+  imbalance_strategy: "weighted_loss"
+
+checkpoint:
+  save_dir: "checkpoints/vision"
+  save_every_epoch: true
+  resume: null
+
+logging:
+  log_dir: "logs/vision"
+  metrics_csv: "logs/vision/metrics_efficientnet_b0_no_aug.csv"
