@@ -43,13 +43,19 @@ sys.path.insert(0, str(PROJECT_ROOT))
 try:
     from sentence_transformers import SentenceTransformer, util
     try:
-        from sentence_transformers import losses
-    except ImportError:
         import sentence_transformers.sentence_transformer.losses as losses
+    except (ImportError, AttributeError):
+        try:
+            from sentence_transformers import losses
+        except ImportError:
+            losses = None
     try:
         from sentence_transformers import InputExample
-    except ImportError:
-        from sentence_transformers.readers import InputExample
+    except (ImportError, AttributeError):
+        try:
+            from sentence_transformers.readers import InputExample
+        except ImportError:
+            InputExample = None
 except ImportError:
     SentenceTransformer = None
     losses = None
@@ -58,15 +64,16 @@ except ImportError:
 
 
 def batch_to_device(batch, device):
-    """Recursively moves all tensors in a batch structure (dict, list, tuple) to device."""
-    if isinstance(batch, torch.Tensor):
+    """
+    Recursively moves all tensors and BatchEncodings in a batch to target device.
+    Handles torch.Tensor, transformers.BatchEncoding, dict/Mapping, and list/tuple.
+    """
+    if hasattr(batch, "to") and callable(batch.to):
         return batch.to(device)
-    elif isinstance(batch, dict):
+    elif isinstance(batch, (list, tuple)):
+        return [batch_to_device(x, device) for x in batch]
+    elif isinstance(batch, dict) or hasattr(batch, "items"):
         return {k: batch_to_device(v, device) for k, v in batch.items()}
-    elif isinstance(batch, list):
-        return [batch_to_device(v, device) for v in batch]
-    elif isinstance(batch, tuple):
-        return tuple(batch_to_device(v, device) for v in batch)
     return batch
 
 
