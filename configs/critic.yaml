@@ -1,11 +1,138 @@
 # Critic / Verification Layer Configuration
-# These thresholds are tuned on the VALIDATION set only.
-critic:
-  tau: 0.70              # top-1 probability threshold
-  delta: 0.15            # margin between top-1 and top-2
-  consistency_check: true # retrieved passage must match diagnosed disease
+# Deterministic rule-based safety, ambiguity disambiguation, and consistency layer.
 
-# Grid for threshold tuning (eval/tune_critic.py)
+critic:
+  tau_accept: 0.70              # top-1 probability threshold for direct ACCEPT
+  delta_margin: 0.15            # minimum margin (p1 - p2) between top-1 and top-2
+  tau_refuse: 0.35              # predictions below this threshold are REFUSED
+  retrieval_min_sim: 0.30       # minimum cosine similarity for retrieved passage
+  require_crop_match: true      # cross-modal check: retrieved chunk crop must match diagnosed crop
+  consistency_check: true       # retrieved passage disease tag must align with diagnosed disease
+
+# Threshold sweep grid for eval/tune_critic.py
 tuning_grid:
   tau_values: [0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90]
   delta_values: [0.05, 0.10, 0.15, 0.20, 0.25, 0.30]
+  target_risk_thresholds: [0.03, 0.05, 0.10] # 3%, 5%, 10% maximum allowable risk
+
+# Multilingual safety & KVK referral messages
+referral:
+  en:
+    title: "Diagnosis Uncertain — KVK Extension Referral"
+    message: "The visual symptoms are ambiguous or confidence is below safety thresholds. Chemical treatments cannot be safely recommended without in-person confirmation. Please visit your nearest Krishi Vigyan Kendra (KVK) or district agricultural extension officer."
+    general_hygiene: "General immediate action: Avoid overhead sprinkler irrigation, isolate symptomatic plants, and ensure proper field drainage."
+  hi:
+    title: "निदान अनिश्चित — कृषि विज्ञान केंद्र (KVK) संपर्क"
+    message: "पत्तियों के लक्षण अस्पष्ट हैं और निश्चितता सुरक्षा सीमा से कम है। बिना विशेषज्ञ सत्यापन के रासायनिक कीटनाशक का उपयोग जोखिम भरा हो सकता है। कृपया अपने नजदीकी कृषि विज्ञान केंद्र (KVK) या कृषि अधिकारी से संपर्क करें।"
+    general_hygiene: "तात्कालिक सलाह: पौधों पर ऊपर से पानी छिड़कने से बचें, रोगग्रस्त पौधों को अलग करें और खेत में उचित जल निकासी बनाए रखें।"
+  mr:
+    title: "निदान अनिश्चित — कृषी विज्ञान केंद्र (KVK) सल्ला"
+    message: "पानावरील लक्षणे अस्पष्ट आहेत आणि विश्वासार्हता सुरक्षित पातळीपेक्षा कमी आहे. प्रत्यक्ष तपासणीशिवाय रासायनिक औषधांची शिफारस करणे पिकासाठी घातक ठरू शकते. कृपया जवळच्या कृषी विज्ञान केंद्र (KVK) किंवा कृषी अधिकाऱ्यांशी संपर्क साधा."
+    general_hygiene: "तात्काळ उपाय: पाटाने पाणी देणे टाळा, रोगट पाने तोडून नष्ट करा आणि शेतात पाण्याचा निचरा योग्य राखा."
+
+# Distinguishing symptom bank for near-tie clarification (CLARIFY decision)
+distinguishing_symptoms:
+  - pair: ["Tomato_Early_Blight", "Tomato_Late_Blight"]
+    crop: "Tomato"
+    en:
+      question: "Symptoms are close between Early Blight and Late Blight. Which of the following best describes your leaves?"
+      option_a: "Concentric dark brown rings (target-board pattern) with yellow halos, mainly on older/lower leaves."
+      option_b: "Water-soaked irregular dark brown/black lesions with fuzzy white mold on leaf undersides in cool/humid weather."
+      class_a: "Tomato_Early_Blight"
+      class_b: "Tomato_Late_Blight"
+    hi:
+      question: "टमाटर में अगेती झुलसा और पछेती झुलसा के बीच लक्षण बहुत मिलते-जुलते हैं। आपकी पत्तियों पर कौन सा लक्षण स्पष्ट है?"
+      option_a: "निचली पुरानी पत्तियों पर संकेंद्री छल्ले (टारगेट जैसी आकृति) और पीला घेरा।"
+      option_b: "पत्तियों पर पानी से भीगे अनियमित काले/भूरे धब्बे और पत्तियों की निचली सतह पर सफेद फफूंद।"
+      class_a: "Tomato_Early_Blight"
+      class_b: "Tomato_Late_Blight"
+    mr:
+      question: "टोमॅटोमध्ये लवकर करपा आणि उशीरा करपा यांमधील लक्षणे जवळची आहेत. पानांवर खालीलपैकी काय दिसते?"
+      option_a: "खालच्या जुन्या पानांवर गोलाकार वलयाकार (टार्गेटसारखे) तपकिरी ठिपके आणि पिवळी किनार."
+      option_b: "पानांवर पाण्यासारखे अनियमित काळपट चट्टे आणि दमट हवेत पानाच्या मागच्या बाजूला पांढरी बुरशी."
+      class_a: "Tomato_Early_Blight"
+      class_b: "Tomato_Late_Blight"
+
+  - pair: ["Potato_Early_Blight", "Potato_Late_Blight"]
+    crop: "Potato"
+    en:
+      question: "Symptoms are close between Potato Early Blight and Late Blight. Which symptom is most visible?"
+      option_a: "Dry brown leaf spots with concentric target-rings starting on lower foliage."
+      option_b: "Rapidly expanding dark water-soaked patches with pale green borders and white downy growth underneath."
+      class_a: "Potato_Early_Blight"
+      class_b: "Potato_Late_Blight"
+    hi:
+      question: "आलू में अगेती झुलसा और पछेती झुलसा में अंतर करने के लिए, पत्तियों पर क्या दिखता है?"
+      option_a: "निचली पत्तियों पर सूखे भूरे धब्बे जिनमें संकेंद्री वलय (रिंग्स) बने हैं।"
+      option_b: "तेजी से फैलते पानी से भीगे काले धब्बे जिनके नीचे सफेद रोयेंदार फफूंद दिखती है।"
+      class_a: "Potato_Early_Blight"
+      class_b: "Potato_Late_Blight"
+    mr:
+      question: "बटाट्यावरील लवकर करपा आणि उशीरा करपा यातील फरक ओळखण्यासाठी, पानांवर काय दिसते?"
+      option_a: "खालच्या पानांवर कोरडे तपकिरी ठिपके ज्यामध्ये गोलाकार वलये आहेत."
+      option_b: "वेगाने पसरणारे काळपट चट्टे आणि पानाच्या खालील बाजूस पांढुरकी बुरशी."
+      class_a: "Potato_Early_Blight"
+      class_b: "Potato_Late_Blight"
+
+  - pair: ["Corn_Common_Rust", "Corn_Northern_Leaf_Blight"]
+    crop: "Corn"
+    en:
+      question: "Corn symptoms are between Common Rust and Northern Leaf Blight. How do the leaf spots appear?"
+      option_a: "Small, oval, raised pustules containing powdery golden-brown or cinnamon rust spores on both surfaces."
+      option_b: "Long, cigar-shaped grayish-green or tan elliptical lesions (1-6 inches long)."
+      class_a: "Corn_Common_Rust"
+      class_b: "Corn_Northern_Leaf_Blight"
+    hi:
+      question: "मक्के में सामान्य रतुआ और उत्तरी पत्ती झुलसा के लक्षण समान हैं। धब्बे कैसे दिखाई दे रहे हैं?"
+      option_a: "पत्तियों के दोनों तरफ छोटे उभरे हुए फफोले जिनमें भूरा या तांबई चूर्ण (पाउडर) भरा है।"
+      option_b: "लंबी सिगार जैसी अंडाकार भूरी पट्टियां (1 से 6 इंच लंबी)।"
+      class_a: "Corn_Common_Rust"
+      class_b: "Corn_Northern_Leaf_Blight"
+    mr:
+      question: "मक्यावरील तांबेरा आणि तुर्सिकम करपा यातील फरक ओळखण्यासाठी, पानावरील चट्टे कसे आहेत?"
+      option_a: "पानाच्या दोन्ही बाजूंना तांबूस-तपकिरी रंगाचे लहान उंचवटे ज्यातून पावडरसारखे बिजाणू निघतात."
+      option_b: "लांबट सिगारेटच्या आकाराचे करडे-तपकिरी लांब पट्टे (१ ते ६ इंच लांब)."
+      class_a: "Corn_Common_Rust"
+      class_b: "Corn_Northern_Leaf_Blight"
+
+  - pair: ["Tomato_Bacterial_Spot", "Tomato_Septoria_Leaf_Spot"]
+    crop: "Tomato"
+    en:
+      question: "Symptoms are between Tomato Bacterial Spot and Septoria Leaf Spot. What do the spots look like closely?"
+      option_a: "Small, water-soaked dark brown spots that feel greasy, sometimes causing blossom drop."
+      option_b: "Small circular spots with dark brown margins and sunken grayish-white centers dotted with tiny black specks."
+      class_a: "Tomato_Bacterial_Spot"
+      class_b: "Tomato_Septoria_Leaf_Spot"
+    hi:
+      question: "टमाटर में जीवाणु धब्बा और सेप्टोरिया पत्ती धब्बा में अंतर करने के लिए, धब्बों का रूप क्या है?"
+      option_a: "छोटे, पानी से भीगे गहरे भूरे तैलीय धब्बे।"
+      option_b: "छोटे गोल धब्बे जिनका केंद्र राख जैसे सफेद-भूरे रंग का है और उसमें काले बारीक बिंदु हैं।"
+      class_a: "Tomato_Bacterial_Spot"
+      class_b: "Tomato_Septoria_Leaf_Spot"
+    mr:
+      question: "टोमॅटोवरील जिवाणू ठिपके आणि सेप्टोरिया ठिपके यातील फरक ओळखण्यासाठी, ठिपके कसे दिसतात?"
+      option_a: "लहान, तेलकट दिसणारे काळपट तपकिरी ठिपके."
+      option_b: "लहान गोलाकार ठिपके ज्यांचा मध्यभाग पांढुरका-राखाडी असून त्यात बारीक काळे ठिपके आहेत."
+      class_a: "Tomato_Bacterial_Spot"
+      class_b: "Tomato_Septoria_Leaf_Spot"
+
+  - pair: ["Tomato_Yellow_Leaf_Curl_Virus", "Tomato_Mosaic_Virus"]
+    crop: "Tomato"
+    en:
+      question: "Viral symptoms detected. What is the primary leaf and plant shape?"
+      option_a: "Severe upward cupping and curling of leaflets with yellow margins and stunted bushy growth."
+      option_b: "Mottling with alternating light green and dark green mosaic patches, blistering or shoe-string leaf distortion."
+      class_a: "Tomato_Yellow_Leaf_Curl_Virus"
+      class_b: "Tomato_Mosaic_Virus"
+    hi:
+      question: "टमाटर में विषाणु (वायरस) के लक्षण हैं। पौधों और पत्तियों की बनावट कैसी है?"
+      option_a: "पत्तियों का ऊपर की ओर मुड़ना (कप जैसा आकार), किनारों का पीला पड़ना और पौधा बौना रहना।"
+      option_b: "पत्तियों पर हल्के और गहरे हरे रंग के चितकबरे मोज़ेक धब्बे और पत्तियों का सिकुड़ना।"
+      class_a: "Tomato_Yellow_Leaf_Curl_Virus"
+      class_b: "Tomato_Mosaic_Virus"
+    mr:
+      question: "टोमॅटोमध्ये विषाणूजन्य लक्षणे आहेत. पानांचा आकार कसा बदलला आहे?"
+      option_a: "पाने वरच्या बाजूला वाटीसारखी दुमडणे, कडा पिवळ्या पडणे आणि रोपाची वाढ खुंटणे."
+      option_b: "पानांवर फिकट व गडद हिरव्या रंगाचे मोझॅक डाग आणि पानांचा पोत चुरगळल्यासारखा दिसणे."
+      class_a: "Tomato_Yellow_Leaf_Curl_Virus"
+      class_b: "Tomato_Mosaic_Virus"
