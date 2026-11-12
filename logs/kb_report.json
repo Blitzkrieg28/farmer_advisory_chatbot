@@ -1,0 +1,35 @@
+{
+  "mode": "real",
+  "generated_at": "2026-11-12T13:23:46.163492+00:00",
+  "total_chunks": 429,
+  "pdfs_processed": [
+    "gra002.pdf",
+    "Grapes.pdf",
+    "ICAR_IIMR_Maize_Diseases.pdf",
+    "ipm_pop_grapes (2).pdf",
+    "Maize.pdf",
+    "Potato.pdf",
+    "TNAU_Maize_Common_Rust.pdf",
+    "Tomato.pdf"
+  ],
+  "disease_coverage": {
+    "Tomato_Bacterial_Spot": 24,
+    "Tomato_Early_Blight": 21,
+    "Tomato_Late_Blight": 17,
+    "Tomato_Leaf_Mold": 0,
+    "Tomato_Septoria_Leaf_Spot": 8,
+    "Tomato_Yellow_Leaf_Curl_Virus": 3,
+    "Tomato_Mosaic_Virus": 1,
+    "Potato_Early_Blight": 27,
+    "Potato_Late_Blight": 19,
+    "Corn_Common_Rust": 10,
+    "Corn_Northern_Leaf_Blight": 5,
+    "Grape_Black_Rot": 7
+  },
+  "known_gaps_notes": {
+    "Tomato_Leaf_Mold": "Expected gap: NIPHM Tomato IPM package focuses on open-field blights/viruses. Leaf mold (Passalora fulva) is primarily a greenhouse/polyhouse disease in India.",
+    "Grape_Black_Rot": "Covered with 7 chunks via NHB gra002.pdf (Bordeaux mixture 4:4:100)."
+  },
+  "garbled_chunks": 0,
+  "chunks_with_dosage": 86
+}

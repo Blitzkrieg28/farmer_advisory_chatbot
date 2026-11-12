@@ -1,0 +1,13 @@
+{
+  "timestamp": "2026-11-12T16:18:46.332524+00:00",
+  "mode": "real",
+  "seed": 42,
+  "optimal_tau": 0.5,
+  "optimal_delta": 0.05,
+  "coverage": 0.744,
+  "selective_risk": 0.129,
+  "selective_accuracy": 0.871,
+  "clarification_rate": 0.108,
+  "refusal_rate": 0.148,
+  "num_evaluated_samples": 500
+}
