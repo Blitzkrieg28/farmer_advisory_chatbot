@@ -41,13 +41,33 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 try:
-    from sentence_transformers import SentenceTransformer, losses, util
-    from sentence_transformers.readers import InputExample
+    from sentence_transformers import SentenceTransformer, util
+    try:
+        from sentence_transformers import losses
+    except ImportError:
+        import sentence_transformers.sentence_transformer.losses as losses
+    try:
+        from sentence_transformers import InputExample
+    except ImportError:
+        from sentence_transformers.readers import InputExample
 except ImportError:
     SentenceTransformer = None
     losses = None
     util = None
     InputExample = None
+
+
+def batch_to_device(batch, device):
+    """Recursively moves all tensors in a batch structure (dict, list, tuple) to device."""
+    if isinstance(batch, torch.Tensor):
+        return batch.to(device)
+    elif isinstance(batch, dict):
+        return {k: batch_to_device(v, device) for k, v in batch.items()}
+    elif isinstance(batch, list):
+        return [batch_to_device(v, device) for v in batch]
+    elif isinstance(batch, tuple):
+        return tuple(batch_to_device(v, device) for v in batch)
+    return batch
 
 
 # ---------------------------------------------------------------------------
@@ -361,15 +381,26 @@ def train_retriever(
         for batch in train_dataloader:
             optimizer.zero_grad()
             features, labels = batch
+            features = batch_to_device(features, device)
+            if labels is not None:
+                labels = batch_to_device(labels, device)
+
             if scaler:
                 with torch.amp.autocast("cuda"):
                     loss_value = train_loss_fn(features, labels)
                 scaler.scale(loss_value).backward()
+                max_norm = config["training"].get("max_grad_norm", 1.0)
+                if max_norm:
+                    scaler.unscale_(optimizer)
+                    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
                 scaler.step(optimizer)
                 scaler.update()
             else:
                 loss_value = train_loss_fn(features, labels)
                 loss_value.backward()
+                max_norm = config["training"].get("max_grad_norm", 1.0)
+                if max_norm:
+                    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
                 optimizer.step()
 
             scheduler.step()
