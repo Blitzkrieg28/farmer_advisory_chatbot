@@ -37,9 +37,14 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
+
+try:
+    import torch
+except ImportError:
+    torch = None
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -102,22 +107,26 @@ def pivot_to_english(query: str, crop_hint: str = "", disease_hint: str = "") ->
 # Main Evaluation Function
 # ---------------------------------------------------------------------------
 def run_evaluation(
-    retriever_finetuned: Retriever,
+    retriever_finetuned: Optional[Retriever],
     retriever_zeroshot: Retriever,
     eval_queries: List[Dict],
     bootstrap_iterations: int = 500,
     smoke: bool = False,
 ) -> Tuple[List[Dict], List[Dict]]:
     """
-    Evaluates all 5 configurations on the query test set.
+    Evaluates configurations on the query test set.
+    If retriever_finetuned is None, evaluates baseline configurations only.
     """
     configs = [
         ("bm25_direct", "BM25 Direct"),
         ("bm25_pivot", "BM25 + English Pivot"),
         ("e5_zeroshot", "e5 Zero-Shot"),
-        ("e5_finetuned", "e5 Fine-Tuned"),
-        ("pivot_e5", "e5 Fine-Tuned + English Pivot"),
     ]
+    if retriever_finetuned is not None:
+        configs.extend([
+            ("e5_finetuned", "e5 Fine-Tuned"),
+            ("pivot_e5", "e5 Fine-Tuned + English Pivot"),
+        ])
 
     all_metrics_rows = []
     failure_records = []
@@ -127,6 +136,9 @@ def run_evaluation(
     for q in eval_queries:
         lang = q.get("language", "en")
         queries_by_lang.setdefault(lang, []).append(q)
+
+    # Use whatever retriever is available for BM25 (both have the identical KB index)
+    bm25_retriever = retriever_finetuned if retriever_finetuned is not None else retriever_zeroshot
 
     for cfg_key, cfg_label in configs:
         print(f"\nEvaluating configuration: {cfg_label}...")
@@ -153,10 +165,10 @@ def run_evaluation(
                 # Dispatch search according to configuration
                 if cfg_key == "bm25_direct":
                     query_text = clean_query(raw_query)
-                    hits = retriever_finetuned.search_bm25(query_text, k=10)
+                    hits = bm25_retriever.search_bm25(query_text, k=10)
                 elif cfg_key == "bm25_pivot":
                     query_text = pivot_to_english(raw_query, crop, disease)
-                    hits = retriever_finetuned.search_bm25(query_text, k=10)
+                    hits = bm25_retriever.search_bm25(query_text, k=10)
                 elif cfg_key == "e5_zeroshot":
                     query_text = clean_query(raw_query)
                     hits = retriever_zeroshot.search_dense(query_text, k=10)
@@ -288,9 +300,21 @@ def main():
         retriever_ft = Retriever(model_name_or_path=str(dummy_dir), kb_path=kb_file, device="cpu")
         retriever_zs = Retriever(model_name_or_path=str(dummy_dir), kb_path=kb_file, device="cpu")
     else:
+        device = "cuda" if (torch is not None and torch.cuda.is_available()) else "cpu"
+        print(f"Loading zero-shot retriever (intfloat/multilingual-e5-small) on {device}...")
+        retriever_zs = Retriever(model_name_or_path="intfloat/multilingual-e5-small", kb_path=kb_file, device=device)
+
         model_dir = args.model_dir or "checkpoints/retriever/e5_small_finetuned_seed42_best"
-        retriever_ft = Retriever(model_name_or_path=model_dir, kb_path=kb_file, device="cuda" if torch.cuda.is_available() else "cpu")
-        retriever_zs = Retriever(model_name_or_path="intfloat/multilingual-e5-small", kb_path=kb_file, device="cuda" if torch.cuda.is_available() else "cpu")
+        model_path = Path(model_dir)
+        if model_path.exists() and model_path.is_dir() and any(model_path.iterdir()):
+            print(f"Loading fine-tuned retriever from: {model_dir} (device: {device})...")
+            retriever_ft = Retriever(model_name_or_path=str(model_dir), kb_path=kb_file, device=device)
+        else:
+            if args.model_dir:
+                print(f"[WARNING] Specified model_dir does not exist: '{args.model_dir}'. Running baseline evaluation only.")
+            else:
+                print(f"[INFO] No fine-tuned checkpoint found at '{model_dir}'. Running baseline evaluation (BM25 Direct, BM25 Pivot, and Zero-Shot e5).")
+            retriever_ft = None
 
     # Run benchmark
     results_rows, failures = run_evaluation(
