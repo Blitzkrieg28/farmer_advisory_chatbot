@@ -76,6 +76,48 @@ class MockVisionDiagnoser:
             }
 
 
+class MockRetriever:
+    """Mock retriever for instant offline CPU smoke testing without downloading model weights."""
+    def __init__(self, kb_path: Union[str, Path]):
+        self.chunks = []
+        p = Path(kb_path)
+        if p.exists():
+            with open(p, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.strip() and not line.strip().startswith("#"):
+                        self.chunks.append(json.loads(line.strip()))
+        if not self.chunks:
+            self.chunks = [{
+                "chunk_id": "Tomato_p0022_c0019",
+                "doc_name": "Tomato.pdf",
+                "page": 23,
+                "text": "Early blight caused by Alternaria solani. Spray Mancozeb 75 WP @ 2.5 g/L of water.",
+                "has_dosage": True
+            }]
+
+    def retrieve(self, query: str, top_k: int = 3, crop_filter: Optional[str] = None) -> List[Dict]:
+        hits = []
+        for c in self.chunks[:top_k]:
+            hits.append({
+                "chunk_id": c.get("chunk_id", ""),
+                "score": 0.88,
+                "doc_name": c.get("doc_name", "Tomato.pdf"),
+                "page": c.get("page", 23),
+                "text": c.get("text", "Early blight caused by Alternaria solani. Spray Mancozeb 75 WP @ 2.5 g/L of water."),
+                "has_dosage": c.get("has_dosage", True),
+                "retrieval_method": "mock_smoke",
+            })
+        return hits
+
+    def search_dense(self, query: str, k: int = 5, crop_filter: Optional[str] = None, **kwargs) -> List[Dict]:
+        top_k = kwargs.get("top_k", k)
+        return self.retrieve(query, top_k=top_k, crop_filter=crop_filter)
+
+    def search_bm25(self, query: str, k: int = 5, crop_filter: Optional[str] = None, **kwargs) -> List[Dict]:
+        top_k = kwargs.get("top_k", k)
+        return self.retrieve(query, top_k=top_k, crop_filter=crop_filter)
+
+
 class FarmerAdvisoryPipeline:
     """
     End-to-End Verification-First Agricultural Advisory System.
@@ -132,19 +174,16 @@ class FarmerAdvisoryPipeline:
             self.vision_diagnoser = None
 
         # 3. Load Retriever
-        kb_file = kb_path or (
-            PROJECT_ROOT / "kb" / ("smoke_chunks.jsonl" if smoke else "chunks.jsonl")
-        )
-        ret_model = retriever_model or (
-            str(PROJECT_ROOT / "checkpoints" / "smoke_dummy_transformer")
-            if smoke
-            else "intfloat/multilingual-e5-small"
-        )
-        self.retriever = Retriever(
-            model_name_or_path=ret_model,
-            kb_path=kb_file,
-            device=device,
-        )
+        kb_file = kb_path or (PROJECT_ROOT / "kb" / "chunks.jsonl")
+        if smoke and not (retriever_model and Path(retriever_model).exists()):
+            self.retriever = MockRetriever(kb_file)
+        else:
+            ret_model = retriever_model or "intfloat/multilingual-e5-small"
+            self.retriever = Retriever(
+                model_name_or_path=ret_model,
+                kb_path=kb_file,
+                device=device,
+            )
 
         # 4. Load Critic Layer
         critic_cfg_file = critic_config or (PROJECT_ROOT / "configs" / "critic.yaml")

@@ -16,11 +16,7 @@ demo:
   kb_path: "kb/chunks.jsonl"
   critic_config: "configs/critic.yaml"
   
-  # Smoke-mode fallback paths
-  smoke_vision_checkpoint: "checkpoints/vision/smoke_efficientnet_b0_seed42_best.pth"
-  smoke_retriever_checkpoint: "checkpoints/retriever/smoke_dummy_transformer"
-  smoke_kb_path: "kb/smoke_chunks.jsonl"
-  
+
   gradio:
     server_name: "0.0.0.0"
     server_port: 7860
