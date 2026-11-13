@@ -1,0 +1,3 @@
+run,seed,epochs,best_epoch,best_val_loss,final_train_loss_unw,train_time_min,PV_val_acc,PV_test_acc,PV_test_acc_k_n,PV_test_acc_CI,PV_test_f1,PlantDoc_acc,PlantDoc_acc_k_n,PlantDoc_acc_CI,PlantDoc_f1,PlantDoc_f1_CI,PlantDoc_crop_level_acc,PlantDoc_crop_known_acc_ORACLE,PlantDoc_ECE,conf_when_correct,conf_when_wrong,params,cpu_latency_ms
+efficientnet_b0_plantvillage_seed42,42,20,17,0.0142,0.0008,49.9,99.84,99.9,3125/3128,99.78-100.00,99.88,30.71,39/127,22.8-38.6,21.83,15.5-27.4,65.4,40.9,0.595,0.968,0.873,4025482,35.12
+efficientnet_b0_pv_pd_seed42,42,20,10,0.0116,0.0018,59.5,99.81,99.71,3119/3128,99.52-99.87,99.66,66.14,84/127,58.3-74.0,63.44,54.5-69.6,92.1,73.2,0.237,0.934,0.768,4025482,36.48

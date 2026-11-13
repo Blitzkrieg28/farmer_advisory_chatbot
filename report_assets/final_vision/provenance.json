@@ -1,0 +1,48 @@
+{
+  "generated": "2026-11-13T10:41:23",
+  "runs_used": [
+    "efficientnet_b0_plantvillage_seed42",
+    "efficientnet_b0_pv_pd_seed42"
+  ],
+  "runs_excluded_as_sanity": [],
+  "n_plantdoc_test": 127,
+  "n_pv_test": 3128,
+  "bootstrap": 2000,
+  "source_files": {
+    "logs/vision/efficientnet_b0_plantvillage_seed42_preds_val.csv": {
+      "sha256_16": "9f13dcea97f85afe",
+      "rows": 3128
+    },
+    "logs/vision/efficientnet_b0_plantvillage_seed42_preds_test.csv": {
+      "sha256_16": "fe7cd61c03bea71c",
+      "rows": 3128
+    },
+    "logs/vision/efficientnet_b0_plantvillage_seed42_preds_plantdoc_test.csv": {
+      "sha256_16": "adc04e31ca476195",
+      "rows": 127
+    },
+    "logs/vision/efficientnet_b0_plantvillage_seed42_metrics.csv": {
+      "sha256_16": "72403aba9c91e365",
+      "rows": 20
+    },
+    "logs/vision/efficientnet_b0_pv_pd_seed42_preds_val.csv": {
+      "sha256_16": "1dd59affa5e41013",
+      "rows": 3128
+    },
+    "logs/vision/efficientnet_b0_pv_pd_seed42_preds_test.csv": {
+      "sha256_16": "7e2b66f8c5b1b81d",
+      "rows": 3128
+    },
+    "logs/vision/efficientnet_b0_pv_pd_seed42_preds_plantdoc_test.csv": {
+      "sha256_16": "aa74adee03eb2a7e",
+      "rows": 127
+    },
+    "logs/vision/efficientnet_b0_pv_pd_seed42_metrics.csv": {
+      "sha256_16": "d8c0aab2f3143b17",
+      "rows": 20
+    }
+  },
+  "flags": [
+    "efficientnet_b0_plantvillage_seed42: zero recall on PlantDoc for Tomato_Bacterial_Spot, Tomato_Leaf_Mold, Tomato_Yellow_Leaf_Curl_Virus, Tomato_Mosaic_Virus, Tomato_Healthy"
+  ]
+}

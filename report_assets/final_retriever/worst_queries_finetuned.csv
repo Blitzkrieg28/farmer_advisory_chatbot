@@ -1,0 +1,31 @@
+set,language,query,gold,top3,rr
+VAL (synthetic),en,Which chemicals can be used for weed control according to the passage?,Grapes_p0029_c0028,"['Potato_p0031_c0035', 'Tomato_p0028_c0022', 'Grapes_p0023_c0018']",0.0
+VAL (synthetic),en,How should weeds be managed during different stages of crop growth?,Grapes_p0029_c0028,"['Tomato_p0030_c0025', 'Tomato_p0030_c0027', 'Potato_p0031_c0034']",0.0
+VAL (synthetic),en,What are some effective fungicides mentioned for controlling diseases?,Grapes_p0029_c0028,"['Maize_p0045_c0054', 'Maize_p0045_c0053', 'Maize_p0045_c0051']",0.0
+VAL (synthetic),en,What specific actions should I take to manage excessive crop load on my vineyards?,Grapes_p0037_c0039,"['ipm_pop_grapes (2)_p0012_c0015', 'ipm_pop_grapes (2)_p0009_c0009', 'Grapes_p0027_c0024']",0.0
+VAL (synthetic),en,Can you suggest any resistant varieties for my crop?,Grapes_p0023_c0021,"['Grapes_p0022_c0017', 'Grapes_p0022_c0016', 'ipm_pop_grapes (2)_p0019_c0024']",0.0
+VAL (synthetic),hi,क्या आप Empoasca fabae के खिलाफ इस्तेमाल की गई नियंत्रण विधियों के बारे में जानकारी दे सकते हैं?,Grapes_p0009_c0005,"['Grapes_p0027_c0024', 'Potato_p0062_c0068', 'Potato_p0013_c0010']",0.0
+VAL (synthetic),hi,फ्ले बिखरे कीटनाशक का कृषि के लिए क्या महत्व है?,Grapes_p0009_c0005,"['Grapes_p0026_c0023', 'Grapes_p0030_c0030', 'ipm_pop_grapes (2)_p0029_c0026']",0.0
+VAL (synthetic),hi,यह पौधे इस पद के अनुसार कीटों को दूर करने के लिए कैसे काम करते हैं?,Grapes_p0020_c0015,"['Tomato_p0031_c0029', 'Maize_p0031_c0027', 'Tomato_p0031_c0028']",0.0
+VAL (synthetic),hi,"क्या हमें कीड़ों को मारने के लिए क्लोरोफॉर्म का उपयोग करना चाहिए, और यदि हां, तो इसे सुरक्षित रूप से कैसे लागू किया जाना चाहिए?",Grapes_p0014_c0008,"['Grapes_p0026_c0023', 'Tomato_p0034_c0030', 'Maize_p0024_c0012']",0.0
+VAL (synthetic),hi,क्या आप मेरी फसल के लिए कोई प्रतिरोधी किस्मों का सुझाव दे सकते हैं?,Grapes_p0023_c0021,"['Grapes_p0022_c0016', 'ipm_pop_grapes (2)_p0019_c0024', 'Grapes_p0022_c0017']",0.0
+VAL (synthetic),mr,Empoasca fabae च्या विरूद्ध वापरल्या जाणार्या नियंत्रण पद्धतींबद्दल माहिती देऊ शकता का?,Grapes_p0009_c0005,"['Grapes_p0027_c0024', 'Potato_p0062_c0068', 'Grapes_p0054_c0052']",0.0
+VAL (synthetic),mr,कृषी क्षेत्रासाठी फुले बिबट्याचा काय अर्थ आहे?,Grapes_p0009_c0005,"['ipm_pop_grapes (2)_p0029_c0026', 'Potato_p0023_c0020', 'Grapes_p0026_c0023']",0.0
+VAL (synthetic),mr,या वनस्पतींनी संकटांना कसे दूर करावे?,Grapes_p0020_c0015,"['Grapes_p0019_c0014', 'Grapes_p0027_c0024', 'Tomato_p0031_c0028']",0.0
+VAL (synthetic),mr,कीटकनाशकासाठी क्लोरोफॉर्मचा वापर करावा आणि जर होय तर तो सुरक्षितपणे कसा करावा?,Grapes_p0014_c0008,"['Maize_p0044_c0041', 'Grapes_p0076_c0096', 'Tomato_p0085_c0087']",0.0
+VAL (synthetic),mr,या वनस्पतींचा यशस्वीपणे वापर कसा केला गेला आहे याची उदाहरणे तुम्ही देऊ शकता का?,Grapes_p0020_c0015,"['Tomato_p0022_c0019', 'Potato_p0074_c0085', 'Maize_p0046_c0055']",0.0
+TEST (human-verified),en,What fungicide sprays are recommended during vegetative and flowering stages of grapevines?,Grapes_p0066_c0076,"['Grapes_p0029_c0027', 'ipm_pop_grapes (2)_p0049_c0050', 'ipm_pop_grapes (2)_p0014_c0018']",0.0
+TEST (human-verified),en,What fungicide sprays are recommended during vegetative and flowering stages of grapevines?,Grapes_p0066_c0077,"['Grapes_p0029_c0027', 'ipm_pop_grapes (2)_p0049_c0050', 'ipm_pop_grapes (2)_p0014_c0018']",0.0
+TEST (human-verified),en,What fungicides and acre dosage should be sprayed for early blight (Alternaria solani) on potato?,Potato_p0028_c0025,"['gra002_p0001_c0003', 'Tomato_p0030_c0026', 'Potato_p0053_c0054']",0.0
+TEST (human-verified),en,How do I control bacterial leaf spot in tomato using copper oxychloride and sanitary practices?,Grapes_p0029_c0025,"['Tomato_p0028_c0023', 'Tomato_p0035_c0031', 'Tomato_p0062_c0061']",0.0
+TEST (human-verified),en,How do I control bacterial leaf spot in tomato using copper oxychloride and sanitary practices?,Grapes_p0030_c0029,"['Tomato_p0028_c0023', 'Tomato_p0035_c0031', 'Tomato_p0062_c0061']",0.0
+TEST (human-verified),hi,अंगूर के वानस्पतिक और फूल आने की अवस्था में कौन से कवकनाशी छिड़काव किए जाते हैं?,Grapes_p0066_c0077,"['ipm_pop_grapes (2)_p0053_c0056', 'gra002_p0000_c0000', 'Grapes_p0067_c0081']",0.0
+TEST (human-verified),hi,आलू में अगेती झुलसा (अल्टरनेरिया सोलेनी) रोग के लिए प्रति एकड़ कौन सी फफूंदनाशी दवा और कितनी मात्रा में छिड़कें?,Potato_p0028_c0025,"['Potato_p0025_c0022', 'Tomato_p0030_c0026', 'gra002_p0001_c0003']",0.0
+TEST (human-verified),hi,टमाटर में जीवाणु पत्ती धब्बा रोग की रोकथाम के लिए कॉपर फफूंदनाशी का क्या उपचार है?,Grapes_p0029_c0025,"['Tomato_p0031_c0029', 'Tomato_p0026_c0020', 'Tomato_p0009_c0006']",0.0
+TEST (human-verified),hi,टमाटर में बैक्टीरियल स्पॉट (जीवाणु धब्बा) रोग के लिए स्ट्रेप्टोसाइक्लिन का कितने पीपीएम घोल बनाकर छिड़काव करें?,gra002_p0001_c0002,"['Tomato_p0028_c0024', 'Tomato_p0028_c0023', 'Tomato_p0035_c0031']",0.0
+TEST (human-verified),hi,टमाटर में जीवाणु पत्ती धब्बा रोग की रोकथाम के लिए कॉपर फफूंदनाशी का क्या उपचार है?,Grapes_p0030_c0029,"['Tomato_p0031_c0029', 'Tomato_p0026_c0020', 'Tomato_p0009_c0006']",0.0
+TEST (human-verified),mr,बटाट्यावरील लवकर येणाऱ्या करप्यासाठी (अगेती करपा) प्रति एकर कोणते औषध आणि किती प्रमाणात फवारावे?,Potato_p0028_c0025,"['Potato_p0027_c0024', 'Potato_p0029_c0030', 'Potato_p0064_c0072']",0.0
+TEST (human-verified),mr,बटाट्यावरील लवकर येणाऱ्या करप्यासाठी (अगेती करपा) प्रति एकर कोणते औषध आणि किती प्रमाणात फवारावे?,gra002_p0001_c0003,"['Potato_p0027_c0024', 'Potato_p0029_c0030', 'Potato_p0064_c0072']",0.0
+TEST (human-verified),mr,टोमॅटोवरील जिवाणू पानांवरील ठिपके रोगाच्या नियंत्रणासाठी कोणते कॉपरयुक्त औषध वापरावे?,Grapes_p0029_c0025,"['Tomato_p0009_c0006', 'Tomato_p0008_c0005', 'Tomato_p0031_c0029']",0.0
+TEST (human-verified),mr,टोमॅटोवरील जिवाणूजन्य ठिपक्यांच्या नियंत्रणासाठी स्ट्रेप्टोसायक्लिनचे किती पीपीएम द्रावण तयार करून फवारावे?,gra002_p0001_c0002,"['Tomato_p0031_c0029', 'Potato_p0027_c0024', 'Tomato_p0080_c0083']",0.0
+TEST (human-verified),mr,टोमॅटोवरील जिवाणू पानांवरील ठिपके रोगाच्या नियंत्रणासाठी कोणते कॉपरयुक्त औषध वापरावे?,Grapes_p0030_c0029,"['Tomato_p0009_c0006', 'Tomato_p0008_c0005', 'Tomato_p0031_c0029']",0.0

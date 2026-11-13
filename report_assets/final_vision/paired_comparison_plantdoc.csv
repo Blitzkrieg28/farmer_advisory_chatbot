@@ -1,0 +1,2 @@
+run,baseline,acc_gain_pts,acc_CI,f1_gain_pts,f1_CI
+efficientnet_b0_pv_pd_seed42,efficientnet_b0_plantvillage_seed42,35.4,+26.0 to +45.7,41.2,+31.9 to +50.4

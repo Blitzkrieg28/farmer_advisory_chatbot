@@ -1,0 +1,3 @@
+run,acc@50%cov,acc@70%cov,acc@90%cov,acc@100%cov
+efficientnet_b0_plantvillage_seed42,45.3,40.4,33.3,30.7
+efficientnet_b0_pv_pd_seed42,84.4,76.4,70.2,66.1

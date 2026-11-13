@@ -1,0 +1,61 @@
+variant,language,metric,eval_retriever.py,independent,diff
+BM25 direct,ALL,Recall@5,18.6,18.9,-0.3
+BM25 direct,ALL,MRR@10,12.5,13.1,-0.6
+BM25 direct,ALL,Recall@1,7.7,8.4,-0.7
+BM25 direct,en,Recall@5,46.4,46.4,0.0
+BM25 direct,en,MRR@10,31.3,31.1,0.2
+BM25 direct,en,Recall@1,20.2,20.7,-0.4
+BM25 direct,hi,Recall@5,5.1,4.6,0.4
+BM25 direct,hi,MRR@10,3.4,3.8,-0.4
+BM25 direct,hi,Recall@1,1.7,2.1,-0.4
+BM25 direct,mr,Recall@5,4.2,5.5,-1.3
+BM25 direct,mr,MRR@10,2.8,4.2,-1.5
+BM25 direct,mr,Recall@1,1.3,2.5,-1.3
+BM25 + English pivot,ALL,Recall@5,18.6,35.3,-16.7
+BM25 + English pivot,ALL,MRR@10,12.5,23.1,-10.7
+BM25 + English pivot,ALL,Recall@1,7.7,14.3,-6.6
+BM25 + English pivot,en,Recall@5,46.4,46.4,0.0
+BM25 + English pivot,en,MRR@10,31.3,31.1,0.2
+BM25 + English pivot,en,Recall@1,20.2,20.7,-0.4
+BM25 + English pivot,hi,Recall@5,5.1,30.4,-25.3
+BM25 + English pivot,hi,MRR@10,3.4,19.6,-16.2
+BM25 + English pivot,hi,Recall@1,1.7,11.4,-9.7
+BM25 + English pivot,mr,Recall@5,4.2,29.1,-24.9
+BM25 + English pivot,mr,MRR@10,2.8,18.7,-15.9
+BM25 + English pivot,mr,Recall@1,1.3,11.0,-9.7
+e5 zero-shot,ALL,Recall@5,42.8,42.8,0.0
+e5 zero-shot,ALL,MRR@10,29.6,29.6,0.0
+e5 zero-shot,ALL,Recall@1,18.6,18.6,0.0
+e5 zero-shot,en,Recall@5,64.6,64.6,0.0
+e5 zero-shot,en,MRR@10,44.8,44.8,0.0
+e5 zero-shot,en,Recall@1,29.5,29.5,0.0
+e5 zero-shot,hi,Recall@5,40.5,40.5,0.0
+e5 zero-shot,hi,MRR@10,26.7,26.7,0.0
+e5 zero-shot,hi,Recall@1,16.0,16.0,0.0
+e5 zero-shot,mr,Recall@5,23.2,23.2,0.0
+e5 zero-shot,mr,MRR@10,17.2,17.2,0.0
+e5 zero-shot,mr,Recall@1,10.1,10.1,0.0
+e5 fine-tuned,ALL,Recall@5,67.9,67.9,0.0
+e5 fine-tuned,ALL,MRR@10,48.4,48.4,0.0
+e5 fine-tuned,ALL,Recall@1,33.6,33.6,0.0
+e5 fine-tuned,en,Recall@5,80.6,80.6,-0.0
+e5 fine-tuned,en,MRR@10,59.1,59.1,0.0
+e5 fine-tuned,en,Recall@1,42.6,42.6,0.0
+e5 fine-tuned,hi,Recall@5,62.0,62.0,-0.0
+e5 fine-tuned,hi,MRR@10,44.6,44.6,0.0
+e5 fine-tuned,hi,Recall@1,30.4,30.4,0.0
+e5 fine-tuned,mr,Recall@5,61.2,61.2,0.0
+e5 fine-tuned,mr,MRR@10,41.6,41.6,0.0
+e5 fine-tuned,mr,Recall@1,27.9,27.9,0.0
+e5 fine-tuned + English pivot,ALL,Recall@5,67.9,72.0,-4.1
+e5 fine-tuned + English pivot,ALL,MRR@10,48.4,51.6,-3.2
+e5 fine-tuned + English pivot,ALL,Recall@1,33.6,36.7,-3.1
+e5 fine-tuned + English pivot,en,Recall@5,80.6,80.6,-0.0
+e5 fine-tuned + English pivot,en,MRR@10,59.1,59.1,0.0
+e5 fine-tuned + English pivot,en,Recall@1,42.6,42.6,0.0
+e5 fine-tuned + English pivot,hi,Recall@5,62.0,70.0,-8.0
+e5 fine-tuned + English pivot,hi,MRR@10,44.6,49.7,-5.1
+e5 fine-tuned + English pivot,hi,Recall@1,30.4,35.9,-5.5
+e5 fine-tuned + English pivot,mr,Recall@5,61.2,65.4,-4.2
+e5 fine-tuned + English pivot,mr,MRR@10,41.6,46.0,-4.4
+e5 fine-tuned + English pivot,mr,Recall@1,27.9,31.6,-3.8

@@ -1,0 +1,45 @@
+{
+  "generated": "2026-11-13T11:48:26",
+  "files": {
+    "kb/chunks.jsonl": {
+      "sha256_16": "50b6c10d3da1da7c",
+      "size_bytes": 1420483
+    },
+    "data/retrieval_train.csv": {
+      "sha256_16": "daf10cea8680288c",
+      "size_bytes": 893235
+    },
+    "data/retrieval_val.csv": {
+      "sha256_16": "f8cab05f6dcacfbc",
+      "size_bytes": 153705
+    },
+    "data/test_queries_template.csv": {
+      "sha256_16": "54c3144c4e886c6d",
+      "size_bytes": 40963
+    },
+    "/content/drive/MyDrive/farmer_advisory_chatbot/logs/retriever/e5_small_finetuned_seed42_metrics.csv": {
+      "sha256_16": "70f863fcf225273a",
+      "size_bytes": 447
+    },
+    "results/retrieval_results.csv": {
+      "sha256_16": "a764dcb763592db4",
+      "size_bytes": 1965
+    }
+  },
+  "n_kb_chunks": 429,
+  "n_train": 4149,
+  "n_val": 711,
+  "n_human_test": 150,
+  "flags": [
+    "KB coverage: Tomato_Leaf_Mold has only 0 chunk(s)",
+    "KB coverage: Tomato_Mosaic_Virus has only 1 chunk(s)",
+    "64 validation chunks never appear in training (out-of-passage generalisation, not the intended setting)",
+    "10 identical query strings in both train and val",
+    "Reported table uses 237 queries per language = the SYNTHETIC validation set (data/retrieval_val.csv), NOT the human test set",
+    "Variants 'BM25 + English Pivot' and 'BM25 Direct' have IDENTICAL metrics in every cell: one of them probably did not run as described (e.g., pivot not translating)",
+    "Variants 'e5 Fine-Tuned' and 'e5 Fine-Tuned + English Pivot' have IDENTICAL metrics in every cell: one of them probably did not run as described (e.g., pivot not translating)",
+    "VAL (synthetic): e5 fine-tuned is better WITHOUT query:/passage: prefixes (50.0 vs 48.4). Check which the training/eval code used",
+    "TEST (human-verified): e5 fine-tuned is better WITHOUT query:/passage: prefixes (9.4 vs 8.1). Check which the training/eval code used",
+    "18 cells of eval_retriever.py's table differ from the independent evaluation by more than 2.0 points"
+  ]
+}
